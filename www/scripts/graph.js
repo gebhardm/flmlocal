@@ -1,39 +1,6 @@
-$(function() {
-	// allow tooltip on datapoints
-	$("<div id='tooltip'></div>").css({
-		position : "absolute",
-		display : "none",
-		border : "1px solid #ccc",
-		padding : "2px",
-		opacity : 0.90
-	}).appendTo("body");
-	// set plot area boundaries
-	var offset = 20; //px
-	var width = $(document).width() - offset * 2;
-	var height = width * 3 / 4;
-	height = (height>600?600:height);
-	$("#graph").width(width).height(height).offset({
-		left : offset
-	});
-	// compute hover
-	$("#graph").on("plothover", function (event, pos, item) {
-		if (item) {
-			var itemTime = new Date(item.datapoint[0]);
-			var hrs = itemTime.getHours();
-			hrs = (hrs < 10 ? '0' + hrs : hrs);
-			var min = itemTime.getMinutes();
-			min = (min < 10 ? '0' + min : min);
-			var sec = itemTime.getSeconds();
-			sec = (sec < 10 ? '0' + sec : sec);
-			$("#tooltip").html(hrs + ':' + min + ':' + sec + ' : ' + item.datapoint[1])
-			.css({
-				top : item.pageY + 7,
-				left : item.pageX + 5
-			})
-			.fadeIn(200);
-		} else
-			$("#tooltip").hide();
-	});
+/* ************************************************************
+ Display a graph for the Fluksometer
+ ************************************************************ */
 	// prepare graph display
 	var series = new Array(); // the received values
 	var selSeries = new Array(); // the selected series to show
@@ -58,37 +25,6 @@ $(function() {
 		yaxis : {
 			min : 0
 		}
-	};
-/* ************************************************************
-   MQTT websocket code in parts taken from the mqttws31.js example and
-   jpmens.net: 
-   http://jpmens.net/2014/07/03/the-mosquitto-mqtt-broker-gets-websockets-support/ 
-************************************************************ */
-	// link to the web server's IP address for MQTT socket connection
-	var client;
-	var reconnectTimeout = 2000;
-
-	function MQTTconnect() {
-		client = new Paho.MQTT.Client(location.host, 8083, "", "FLMgauge");
-		var opts = {
-        		timeout : 3,
-			onSuccess : onConnect,
-			onFailure : function(message) { setTimeout(MQTTconnect, reconnectTimeout); }
-		};
-		// define callback routines
-		client.onConnectionLost = onConnectionLost;
-		client.onMessageArrived = onMessageArrived;
-		client.connect(opts);
-	};
-
-	function onConnect() {
-		client.subscribe("/sensor/#");
-	};
-
-	function onConnectionLost(responseObj) {
-		setTimeout(MQTTconnect, reconnectTimeout);
-		if (responseObj.errorCode !== 0)
-			console.log("onConnectionLost:" + responseObj.errorMessage);
 	};
 
 	function onMessageArrived(message) {
@@ -172,6 +108,44 @@ $(function() {
 		// plot the selection
 		$.plot("#graph", selSeries, options);
 	};
+
+
+$(function() {
+	// allow tooltip on datapoints
+	$("<div id='tooltip'></div>").css({
+		position : "absolute",
+		display : "none",
+		border : "1px solid #ccc",
+		padding : "2px",
+		opacity : 0.90
+	}).appendTo("body");
+	// set plot area boundaries
+	var offset = 20; //px
+	var width = $(document).width() - offset * 2;
+	var height = width * 3 / 4;
+	height = (height>600?600:height);
+	$("#graph").width(width).height(height).offset({
+		left : offset
+	});
+	// compute hover
+	$("#graph").on("plothover", function (event, pos, item) {
+		if (item) {
+			var itemTime = new Date(item.datapoint[0]);
+			var hrs = itemTime.getHours();
+			hrs = (hrs < 10 ? '0' + hrs : hrs);
+			var min = itemTime.getMinutes();
+			min = (min < 10 ? '0' + min : min);
+			var sec = itemTime.getSeconds();
+			sec = (sec < 10 ? '0' + sec : sec);
+			$("#tooltip").html(hrs + ':' + min + ':' + sec + ' : ' + item.datapoint[1])
+			.css({
+				top : item.pageY + 7,
+				left : item.pageX + 5
+			})
+			.fadeIn(200);
+		} else
+			$("#tooltip").hide();
+	});
 
 	MQTTconnect();
 });

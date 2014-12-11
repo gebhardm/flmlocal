@@ -1,33 +1,10 @@
+/* ************************************************************
+ Display a panel for the Fluksometer
+ ************************************************************ */
 // objects containing the actual sensor data as string and value
 var sensors = {}, gauge = {}, counters = {};
 // create an array of sensor values to pass on to a graph
 var gaugeseries = {}, numgauge = 0, numcounter = 0;
-// link to the web server's IP address for MQTT socket connection
-var client;
-var reconnectTimeout = 2000;
-
-function MQTTconnect() {
-	client = new Paho.MQTT.Client(location.host, 8083, "", "FLMgauge");
-	var options = {
-        	timeout : 3,
-		onSuccess : onConnect,
-		onFailure : function(message) { setTimeout(MQTTconnect, reconnectTimeout); }
-	};
-	// define callback routines
-	client.onConnectionLost = onConnectionLost;
-	client.onMessageArrived = onMessageArrived;
-	client.connect(options);
-};
-
-function onConnect() {
-	client.subscribe("/sensor/#");
-};
-
-function onConnectionLost(responseObj) {
-	setTimeout(MQTTconnect, reconnectTimeout);
-	if (responseObj.errorCode !== 0)
-		console.log("onConnectionLost:" + responseObj.errorMessage);
-};
 
 function onMessageArrived(message) {
 	// split the received message at the slashes
