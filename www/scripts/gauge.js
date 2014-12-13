@@ -4,7 +4,6 @@
 // objects containing the actual sensor data as string and value
 var gauge = {}, displays = {};
 // create an array of sensor values to pass on to a graph
-
 var numgauge = 0;
 var limit = 0;
 
@@ -24,24 +23,20 @@ function onMessageArrived(message) {
 	case 'gauge':
 		// Sensor handling - transfer the current values from the payload
 		if (value.length == null) {
-
 			gauge[sensor] = value;
 			unit = '';
 		} else {
 			switch (value.length) {
 			case 1:
-
 				gauge[sensor] = value[0];
 				unit = '';
 				break;
 			case 2:
-
 				gauge[sensor] = value[0];
 				unit = value[1];
 				break;
 			case 3:
 				var date = new Date(value[0] * 1000); // the timestamp
-
 				var now = new Date().getTime();
 				if ((now / 1000 - value[0]) > 60)
 					value[1] = 0; // if too old, set to 0
@@ -72,25 +67,24 @@ function onMessageArrived(message) {
 				limit = 50;
 			else
 				limit = 100;
+			limit = (gauge[sensor]>limit?gauge[sensor]:limit);
 			displays[sensor] = new JustGage({
 					id : sensor,
 					value : gauge[sensor],
 					title : sensor,
 					label : unit,
 					min : 0,
-					max : (gauge[sensor]>limit?gauge[sensor]:limit)
+					max : limit,
+					decimals : 2
 				});
-			$('#sensor' + sensor).html('(Sensor ' + sensor + ')');
 		};
-
 		// now pass the data to the html part
-		if (gauge[sensor] > displays[sensor].txtMaximum)
-			displays[sensor].refresh(displays[sensor].originalValue, gauge[sensor]);
-		else
-			displays[sensor].refresh(gauge[sensor]);
+		if (gauge[sensor] > displays[sensor].txtMax[0].textContent) {
+			displays[sensor].refresh(gauge[sensor], gauge[sensor]);
+		}
+		displays[sensor].refresh(gauge[sensor]);
 		break;
 	case 'counter':
-
 		break;
 	default:
 		break;
