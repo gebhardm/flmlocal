@@ -5,7 +5,6 @@
 var gauge = {}, displays = {};
 // create an array of sensor values to pass on to a graph
 var numgauge = 0;
-var limit = 0;
 
 function onMessageArrived(message) {
 	// split the received message at the slashes
@@ -61,10 +60,13 @@ function onMessageArrived(message) {
 				$('#gauge').append(tabrow);
 			};
 			$('#gc' + numgauge).append(tabcell);
+			var limit = 0, decimals = 0;
 			if (unit == 'W')
 				limit = 250;
-			else if (unit == '°C')
+			else if (unit == '°C') {
 				limit = 50;
+				decimals = 2;
+			}
 			else
 				limit = 100;
 			limit = (gauge[sensor]>limit?gauge[sensor]:limit);
@@ -75,11 +77,11 @@ function onMessageArrived(message) {
 					label : unit,
 					min : 0,
 					max : limit,
-					decimals : 2
+					decimals : decimals
 				});
 		};
 		// now pass the data to the html part
-		if (gauge[sensor] > displays[sensor].txtMax[0].textContent) {
+		if (gauge[sensor] > displays[sensor].txtMaximum) {
 			displays[sensor].refresh(gauge[sensor], gauge[sensor]);
 		}
 		displays[sensor].refresh(gauge[sensor]);
