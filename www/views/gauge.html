@@ -15,7 +15,9 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-	<div nq-repeat="g in gauges">{{g}}</div>
+	<div nq-repeat="g in gauges">
+          <div ng-attr-id="{{g.id}}"></div>
+        </div>
       </div>
     </div>
     <div class="panel panel-default">

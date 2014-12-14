@@ -43,7 +43,6 @@ angular.module("flmUiApp")
 	};
 
 	var gauge = {}, display = {};
-	var numGauge = 0;
 
 	// the web socket connect function
 	function mqttConnect() {
@@ -113,17 +112,11 @@ angular.module("flmUiApp")
 				};
 				// now build the gauge display
 				if (display[sensor] == null) {
-					numgauge++;
-					// put always two gauges into one table row
-					var tabcell = '<div id="' + sensor + '"></div>';
-					if (numgauge % 2 == 1) {
-						var tabrow = '<tr>' +
-						'<td id="gc' + numgauge + '" width=50%></td>' +
-						'<td id="gc' + (numgauge + 1) + '" width=50%></td>' +
-						'</tr>';
-						$scope.gauges.push(tabrow);
-					};
-					//$('#gc' + numgauge).append(tabcell);
+					$scope.gauges.push( { 
+							id    : sensor,
+							name  : sensor,
+							unit  : unit
+					});
 					var limit = 0, decimals = 0;
 					if (unit == 'W')
 						limit = 250;
