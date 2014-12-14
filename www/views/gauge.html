@@ -1,13 +1,27 @@
+<!-- web socket communication -->
+<script type="text/javascript" src="components/mqttws/mqttws31.min.js"></script>
+<!-- gauge graphics -->
+<script type="text/javascript" src="components/raphael/raphael.min.js"></script>
+<script type="text/javascript" src="components/raphael/justgage.min.js"></script>
+
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
 <div id="wrap">
   <div class="container">
     <div class="page-header">
       <h1>FluksoGauges</h1>
     </div>
     <div class="panel panel-default">
-      <div class="panel-body">{{gauge}}</div>
+      <div class="panel-body">
+	<div nq-repeat="g in gauges">{{g}}</div>
+      </div>
     </div>
     <div class="panel panel-default">
-      <div class="panel-body">{{message}}</div>
+      <div class="panel-body">
+	{{message}}
+      </div>
     </div>
     <div class="footer">
       <small>
