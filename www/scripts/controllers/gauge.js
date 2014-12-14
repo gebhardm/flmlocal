@@ -23,7 +23,8 @@ var reconnectTimeout = 2000;
 var port = 8083; // the FLM's web socket port from mosquitto
 var wsID = "FLM" + parseInt(Math.random() * 100, 10); // get "different" websocketIDs
 
-var gauge = {}, display = {};
+var gauge = {}, display = {}, numGauges = 0;
+var row = [];
 
 // the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
@@ -115,12 +116,16 @@ app.controller("GaugeCtrl", function($scope) {
 				};
 				// now build the gauge display
 				if (display[sensor] == null) {
+					numGauges++;
+					var rowIndex = Math.floor((numGauges-1)/2);
+					var colIndex = numGauges % 2;
+					// use a trick to scale the first gauge at 50%
+					if (row[rowIndex] == null) row[rowIndex] = new Array();
+					if ((numGauges > 1) && (colIndex == 0)) row[rowIndex].pop();
+					row[rowIndex].push({id:sensor});
+					if (colIndex == 1) row[rowIndex].push({});
 					$scope.$apply(function() {
-						$scope.gauges.push( { 
-							id    : sensor,
-							name  : sensor,
-							unit  : unit
-						});
+						$scope.gauges = row;
 					});
 					var limit = 0, decimals = 0;
 					if (unit == 'W')

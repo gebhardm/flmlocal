@@ -9,9 +9,13 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-	<div ng-repeat="g in gauges">
-          <div id="{{g.id}}"></div>
-        </div>
+        <table width=100%>
+	  <tr ng-repeat="row in gauges">
+            <td ng-repeat="col in row" width=50%>
+              <div id="{{col.id}}"></div>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
     <div class="panel panel-default">
