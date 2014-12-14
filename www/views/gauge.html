@@ -1,9 +1,3 @@
-<!-- web socket communication -->
-<script type="text/javascript" src="components/mqttws/mqttws31.min.js"></script>
-<!-- gauge graphics -->
-<script type="text/javascript" src="components/raphael/raphael.min.js"></script>
-<script type="text/javascript" src="components/raphael/justgage.min.js"></script>
-
 <div>
     <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
@@ -15,14 +9,14 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-	<div nq-repeat="g in gauges">
-          <div ng-attr-id="{{g.id}}"></div>
+	<div ng-repeat="g in gauges">
+          <div id="{{g.id}}"></div>
         </div>
       </div>
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-	{{message}}
+	<b>Latest MQTT message: </b> <small>{{message}}</small>
       </div>
     </div>
     <div class="footer">

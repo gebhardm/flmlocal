@@ -23,9 +23,12 @@ var reconnectTimeout = 2000;
 var port = 8083; // the FLM's web socket port from mosquitto
 var wsID = "FLM" + parseInt(Math.random() * 100, 10); // get "different" websocketIDs
 
+var gauge = {}, display = {};
+
 // the part of the AngularJS application that handles the gauges
-angular.module("flmUiApp")
-.controller("GaugeCtrl", function($scope) {
+var app = angular.module("flmUiApp");
+
+app.controller("GaugeCtrl", function($scope) {
 	$scope.debug = false;
 	$scope.alerts = [];
 	$scope.gauges = [];
@@ -41,8 +44,6 @@ angular.module("flmUiApp")
 			msg: error
 		});
 	};
-
-	var gauge = {}, display = {};
 
 	// the web socket connect function
 	function mqttConnect() {
@@ -75,14 +76,16 @@ angular.module("flmUiApp")
 		var topic = mqttMsg.destinationName.split('/');
 		var payload = mqttMsg.payloadString;
 		// pass sensor message to the html part
-		$scope.message = mqttMsg.destinationName + ", '" + payload);
+		$scope.$apply(function () {
+			$scope.message = mqttMsg.destinationName + ", " + payload;
+		});
 		// the sensor message type is the third value of the topic
 		var msgType = topic[3]; // gauge or counter
 		var sensor = topic[2]; // the sensor ID
 		var value = JSON.parse(payload); // the transferred payload
 		var unit = '';
 		// now comput the received mqttMessage
-		switch (msqType) {
+		switch (msgType) {
 			case 'config' : break;
 			case 'gauge' :
 				// handle the payload to obtain gauge values
@@ -112,10 +115,12 @@ angular.module("flmUiApp")
 				};
 				// now build the gauge display
 				if (display[sensor] == null) {
-					$scope.gauges.push( { 
+					$scope.$apply(function() {
+						$scope.gauges.push( { 
 							id    : sensor,
 							name  : sensor,
 							unit  : unit
+						});
 					});
 					var limit = 0, decimals = 0;
 					if (unit == 'W')
@@ -126,7 +131,7 @@ angular.module("flmUiApp")
 					} else
 						limit = 100;
 					limit = (gauge[sensor]>limit?gauge[sensor]:limit);
-					displays[sensor] = new JustGage({
+					display[sensor] = new JustGage({
 						id : sensor,
 						value : gauge[sensor],
 						title : sensor,
@@ -137,10 +142,10 @@ angular.module("flmUiApp")
 					});
 				}
 				// now show the current gauge value - set gaugeMax newly if required
-				if (gauge[sensor] > displays[sensor].txtMaximum) {
-					displays[sensor].refresh(gauge[sensor], gauge[sensor]);
+				if (gauge[sensor] > display[sensor].txtMaximum) {
+					display[sensor].refresh(gauge[sensor], gauge[sensor]);
 				}
-				displays[sensor].refresh(gauge[sensor]);
+				display[sensor].refresh(gauge[sensor]);
 				break;
 			case 'counter' : break;
 			default : break;
