@@ -1,32 +1,22 @@
 <div>
-    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+  <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
 
-<div id="wrap">
-  <div class="container">
-    <div class="page-header">
-      <h1>FluksoGauges</h1>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-body">
-        <table width=100%>
-	  <tr ng-repeat="row in gauges">
-            <td ng-repeat="col in row" width=50%>
-              <div id="{{col.id}}"></div>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-body">
-	<b>Latest MQTT message: </b> <small>{{message}}</small>
-      </div>
-    </div>
-    <div class="footer">
-      <small>
-        <p class="text-center">FLM MQTT Gauge, using <a href="http://justgage.com">JustGage</a> under <a href="http://opensource.org/licenses/mit-license.php">MIT License</a></p>
-      </small>
-    </div>
-  </div>
-</div>
+<h1>FluksoGauges</h1>
+<table class="table-bordered" width=100%>
+  <tr ng-repeat="row in gauges">
+    <td ng-repeat="col in row" width=50%>
+       <div id="{{col.id}}"></div>
+    </td>
+  </tr>
+</table>
+<br/>
+<table class="table-bordered" width=100%>
+  <tr>
+    <td><small><strong>Latest MQTT message: </strong>{{message}}</small></td>
+  </tr>
+</table>
+<br/>
+<small>
+  <p align=center>FLM MQTT Gauge, using <a href="http://justgage.com">JustGage</a> under <a href="http://opensource.org/licenses/mit-license.php">MIT License</a></p>
+</small>
