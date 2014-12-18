@@ -55,6 +55,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         controller: 'GaugeCtrl',
         tagName: 'gauge'
       })
+      .when('/panel', {
+        templateUrl: 'views/panel.html',
+        controller: 'PanelCtrl',
+        tagName: 'panel'
+      })
       .otherwise({
         redirectTo: '/'
       });

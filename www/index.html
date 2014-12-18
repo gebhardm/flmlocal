@@ -32,6 +32,7 @@
             <li><a href="#/services"><services>services</services></a></li>
             <li><a href="#/syslog"><syslog>syslog</syslog></a></li>
             <li><a href="#/gauge"><gauge>gauge</gauge></a></li>
+            <li><a href="#/panel"><panel>panel</panel></a></li>
           </ul>
         </div>
       </div>
@@ -42,6 +43,10 @@
     <script src="components/angular/angular.min.js"></script>
     <script src="components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 
+    <script type="text/javascript" src="components/mqttws/mqttws31.min.js"></script>
+    <script type="text/javascript" src="components/raphael/raphael.min.js"></script>
+    <script type="text/javascript" src="components/raphael/justgage.min.js"></script>
+
     <!-- build:js scripts/scripts.js -->
     <script src="scripts/app.js"></script>
     <script src="scripts/controllers/main.js"></script>
@@ -51,6 +56,7 @@
     <script src="scripts/controllers/services.js"></script>
     <script src="scripts/controllers/syslog.js"></script>
     <script src="scripts/controllers/gauge.js"></script>
+    <script src="scripts/controllers/panel.js"></script>
     <!-- endbuild -->
   </body>
 </html>
