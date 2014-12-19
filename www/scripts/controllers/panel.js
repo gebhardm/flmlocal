@@ -75,10 +75,12 @@ app.controller("PanelCtrl", function($scope) {
         var payload = mqttMsg.payloadString;
         var msgType = topic[3];
         var sensorId = topic[2];
-        if (sensors[sensorId] == null) sensors[sensorId] = new Object(sensorId);
+        if (sensors[sensorId] == null) {
+            sensors[sensorId] = new Object(sensorId);
+            sensor.id = sensorId;
+            sensor.name = sensorId;
+        } else sensor = sensors[sensorId];
         var value = JSON.parse(payload);
-        sensor.id = sensorId;
-        sensor.name = sensorId;
         switch (msgType) {
           case "config":
             break;
@@ -114,16 +116,10 @@ app.controller("PanelCtrl", function($scope) {
                   default:
                     break;
                 }
-                sensor.countertimestamp = sensors[sensorId].countertimestamp;
-                sensor.countervalue = sensors[sensorId].countervalue;
-                sensor.counterunit = sensors[sensorId].counterunit;
             }
             break;
 
           case "counter":
-            sensor.gaugevalue = sensors[sensorId].gaugevalue;
-            sensor.gaugeunit = sensors[sensorId].gaugeunit;
-            sensor.gaugetimestamp = sensors[sensorId].gaugetimestamp;
             sensor.countertimestamp = new Date(value[0] * 1e3).toLocaleString();
             sensor.countervalue = value[1] / 1e3;
             sensor.counterunit = "k" + value[2];
