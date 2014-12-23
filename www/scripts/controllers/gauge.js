@@ -1,25 +1,18 @@
 /*
- The MIT License (MIT)
- 
- Copyright (c) 2014 Markus Gebhard <markus.gebhard@web.de>
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
+ * Copyright (c) 2014 Markus Gebhard <markus.gebhard@web.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 "use strict";
 
@@ -34,7 +27,7 @@ var port = 8083;
 var wsID = "FLM" + parseInt(Math.random() * 100, 10);
 
 // get "different" websocketIDs
-var gauge = {}, display = {}, numGauges = 0;
+var gauge = {}, names = {}, display = {}, numGauges = 0;
 
 var row = [];
 
@@ -57,7 +50,8 @@ app.controller("GaugeCtrl", function($scope) {
     }
     // the web socket connect function
     function mqttConnect() {
-        client = new Paho.MQTT.Client(location.hostname, port, "", wsID);
+        //client = new Paho.MQTT.Client(location.hostname, port, "", wsID);
+        client = new Paho.MQTT.Client("192.168.0.50", port, "", wsID);
         var options = {
             timeout: 3,
             onSuccess: onConnect,
@@ -72,6 +66,7 @@ app.controller("GaugeCtrl", function($scope) {
     }
     // event handler on connection established
     function onConnect() {
+        client.subscribe("/device/#");
         client.subscribe("/sensor/#");
     }
     // event handler on connection lost
@@ -79,6 +74,7 @@ app.controller("GaugeCtrl", function($scope) {
         setTimeout(mqttConnect, reconnectTimeout);
         if (responseObj.errorCode !== 0) console.log("onConnectionLost:" + responseObj.errorMessage);
     }
+    // handle the received message
     function onMessageArrived(mqttMsg) {
         // split the received message at the slashes
         var topic = mqttMsg.destinationName.split("/");
@@ -88,6 +84,33 @@ app.controller("GaugeCtrl", function($scope) {
             $scope.message = mqttMsg.destinationName + ", " + payload;
         });
         // the sensor message type is the third value of the topic
+        switch (topic[1]) {
+          case "device":
+            compute_device(topic, payload);
+            break;
+
+          case "sensor":
+            compute_sensor(topic, payload);
+            break;
+
+          default:
+            break;
+        }
+    }
+    // handler for device configuration
+    function compute_device(topic, payload) {
+        var deviceID = topic[2];
+        if (topic[3] == "config") {
+            var config = JSON.parse(payload);
+            for (var i = 1; i <= 13; i++) {
+                if (config[i].enable == "1") {
+                    names[config[i].id] = config[i].function;
+                }
+            }
+        }
+    }
+    // handler for sensor readings
+    function compute_sensor(topic, payload) {
         var msgType = topic[3];
         // gauge or counter
         var sensor = topic[2];
@@ -95,11 +118,8 @@ app.controller("GaugeCtrl", function($scope) {
         var value = JSON.parse(payload);
         // the transferred payload
         var unit = "";
-        // now comput the received mqttMessage
+        // now compute the received mqttMessage
         switch (msgType) {
-          case "config":
-            break;
-
           case "gauge":
             // handle the payload to obtain gauge values
             if (value.length == null) {
@@ -131,7 +151,6 @@ app.controller("GaugeCtrl", function($scope) {
                     break;
                 }
             }
-            ;
             // now build the gauge display
             if (display[sensor] == null) {
                 numGauges++;
@@ -156,7 +175,7 @@ app.controller("GaugeCtrl", function($scope) {
                 display[sensor] = new JustGage({
                     id: sensor,
                     value: gauge[sensor],
-                    title: sensor,
+                    title: names[sensor],
                     label: unit,
                     min: 0,
                     max: limit,
