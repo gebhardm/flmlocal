@@ -63,6 +63,7 @@ app.controller("PanelCtrl", function($scope) {
         client.connect(options);
     }
     function onConnect() {
+        client.subscribe("/device/#");
         client.subscribe("/sensor/#");
     }
     function onConnectionLost(responseObj) {
@@ -70,9 +71,42 @@ app.controller("PanelCtrl", function($scope) {
         if (responseObj.errorCode !== 0) console.log("onConnectionLost:" + responseObj.errorMessage);
     }
     function onMessageArrived(mqttMsg) {
-        var sensor = {};
         var topic = mqttMsg.destinationName.split("/");
         var payload = mqttMsg.payloadString;
+        switch (topic[1]) {
+          case "device":
+            handle_device(topic, payload);
+            break;
+
+          case "sensor":
+            handle_sensor(topic, payload);
+            break;
+
+          default:
+            break;
+        }
+        $scope.sensors = sensors;
+        $scope.message = mqttMsg.destinationName + ", " + payload;
+        $scope.$apply();
+    }
+    function handle_device(topic, payload) {
+        var deviceID = topic[2];
+        if (topic[3] == "config") {
+            var config = JSON.parse(payload);
+            for (var i = 1; i <= 13; i++) {
+                if (config[i].enable == "1") {
+                    var sensorId = config[i].id;
+                    if (sensors[sensorId] == null) {
+                        sensors[sensorId] = new Object(sensorId);
+                        sensors[sensorId].id = config[i].id;
+                        sensors[sensorId].name = config[i].function;
+                    } else sensors[sensorId].name = config[i].function;
+                }
+            }
+        }
+    }
+    function handle_sensor(topic, payload) {
+        var sensor = {};
         var msgType = topic[3];
         var sensorId = topic[2];
         if (sensors[sensorId] == null) {
@@ -82,9 +116,6 @@ app.controller("PanelCtrl", function($scope) {
         } else sensor = sensors[sensorId];
         var value = JSON.parse(payload);
         switch (msgType) {
-          case "config":
-            break;
-
           case "gauge":
             if (value.length == null) {
                 sensor.gaugevalue = value;
@@ -129,9 +160,6 @@ app.controller("PanelCtrl", function($scope) {
             break;
         }
         sensors[sensorId] = sensor;
-        $scope.sensors = sensors;
-        $scope.message = mqttMsg.destinationName + ", " + payload;
-        $scope.$apply();
     }
     mqttConnect();
 });
