@@ -80,13 +80,13 @@ app.controller("PanelCtrl", function($scope) {
 
           case "sensor":
             handle_sensor(topic, payload);
+            $scope.message = mqttMsg.destinationName + ", " + payload;
             break;
 
           default:
             break;
         }
         $scope.sensors = sensors;
-        $scope.message = mqttMsg.destinationName + ", " + payload;
         $scope.$apply();
     }
     function handle_device(topic, payload) {

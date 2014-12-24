@@ -85,10 +85,6 @@ app.controller("GaugeCtrl", function($scope) {
         // split the received message at the slashes
         var topic = mqttMsg.destinationName.split("/");
         var payload = mqttMsg.payloadString;
-        // pass sensor message to the html part
-        $scope.$apply(function() {
-            $scope.message = mqttMsg.destinationName + ", " + payload;
-        });
         // the sensor message type is the third value of the topic
         switch (topic[1]) {
           case "device":
@@ -97,6 +93,10 @@ app.controller("GaugeCtrl", function($scope) {
 
           case "sensor":
             compute_sensor(topic, payload);
+            // pass sensor message to the html part
+            $scope.$apply(function() {
+                $scope.message = mqttMsg.destinationName + ", " + payload;
+            });
             break;
 
           default:
