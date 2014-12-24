@@ -28,13 +28,13 @@ var client;
 
 var reconnectTimeout = 2e3;
 
-var port = 8083;
+var broker = location.hostname, port = 8083;
 
 // the FLM's web socket port from mosquitto
 var wsID = "FLM" + parseInt(Math.random() * 100, 10);
 
 // get "different" websocketIDs
-var gauge = {}, names = {}, display = {}, numGauges = 0;
+var sensors = {}, numGauges = 0;
 
 var row = [];
 
@@ -57,7 +57,7 @@ app.controller("GaugeCtrl", function($scope) {
     }
     // the web socket connect function
     function mqttConnect() {
-        client = new Paho.MQTT.Client(location.hostname, port, "", wsID);
+        client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,
             onSuccess: onConnect,
@@ -88,11 +88,11 @@ app.controller("GaugeCtrl", function($scope) {
         // the sensor message type is the third value of the topic
         switch (topic[1]) {
           case "device":
-            compute_device(topic, payload);
+            handle_device(topic, payload);
             break;
 
           case "sensor":
-            compute_sensor(topic, payload);
+            handle_sensor(topic, payload);
             // pass sensor message to the html part
             $scope.$apply(function() {
                 $scope.message = mqttMsg.destinationName + ", " + payload;
@@ -104,43 +104,55 @@ app.controller("GaugeCtrl", function($scope) {
         }
     }
     // handler for device configuration
-    function compute_device(topic, payload) {
+    function handle_device(topic, payload) {
         var deviceID = topic[2];
         if (topic[3] == "config") {
             var config = JSON.parse(payload);
-            for (var i = 1; i <= 13; i++) {
-                if (config[i].enable == "1") {
-                    names[config[i].id] = config[i].function;
+            for (var obj in config) {
+                var cfg = config[obj];
+                if (cfg.enable == "1") {
+                    if (sensors[cfg.id] == null) {
+                        sensors[cfg.id] = new Object();
+                        sensors[cfg.id].id = cfg.id;
+                        sensors[cfg.id].name = cfg.function;
+                    } else sensors[cfg.id].name = cfg.function;
                 }
             }
         }
     }
     // handler for sensor readings
-    function compute_sensor(topic, payload) {
+    function handle_sensor(topic, payload) {
+        var sensor = {};
+        // the retrieved sensor information
         var msgType = topic[3];
         // gauge or counter
-        var sensor = topic[2];
+        var sensorId = topic[2];
         // the sensor ID
         var value = JSON.parse(payload);
         // the transferred payload
-        var unit = "";
+        // check if sensor was already retrieved
+        if (sensors[sensorId] == null) {
+            sensors[sensorId] = new Object();
+            sensor.id = sensorId;
+            sensor.name = sensorId;
+        } else sensor = sensors[sensorId];
         // now compute the received mqttMessage
         switch (msgType) {
           case "gauge":
             // handle the payload to obtain gauge values
             if (value.length == null) {
-                gauge[sensor] = value;
-                unit = "";
+                sensor.value = value;
+                sensor.unit = "";
             } else {
                 switch (value.length) {
                   case 1:
-                    gauge[sensor] = value[0];
-                    unit = "";
+                    sensor.value = value[0];
+                    sensor.unit = "";
                     break;
 
                   case 2:
-                    gauge[sensor] = value[0];
-                    unit = value[1];
+                    sensor.value = value[0];
+                    sensor.unit = value[1];
                     break;
 
                   case 3:
@@ -149,8 +161,8 @@ app.controller("GaugeCtrl", function($scope) {
                     var now = new Date().getTime();
                     if (now / 1e3 - value[0] > 60) value[1] = 0;
                     // if too old, set to 0
-                    gauge[sensor] = value[1];
-                    unit = value[2];
+                    sensor.value = value[1];
+                    sensor.unit = value[2];
                     break;
 
                   default:
@@ -158,7 +170,7 @@ app.controller("GaugeCtrl", function($scope) {
                 }
             }
             // now build the gauge display
-            if (display[sensor] == null) {
+            if (sensor.display == null) {
                 numGauges++;
                 var rowIndex = Math.floor((numGauges - 1) / 2);
                 var colIndex = numGauges % 2;
@@ -166,33 +178,34 @@ app.controller("GaugeCtrl", function($scope) {
                 if (row[rowIndex] == null) row[rowIndex] = new Array();
                 if (numGauges > 1 && colIndex == 0) row[rowIndex].pop();
                 row[rowIndex].push({
-                    id: sensor
+                    id: sensorId
                 });
                 if (colIndex == 1) row[rowIndex].push({});
                 $scope.$apply(function() {
                     $scope.gauges = row;
                 });
                 var limit = 0, decimals = 0;
-                if (unit == "W") limit = 250; else if (unit == "°C") {
+                if (sensor.unit == "W") limit = 250; else if (sensor.unit == "°C") {
                     limit = 50;
                     decimals = 2;
                 } else limit = 100;
-                limit = gauge[sensor] > limit ? gauge[sensor] : limit;
-                display[sensor] = new JustGage({
-                    id: sensor,
-                    value: gauge[sensor],
-                    title: names[sensor],
-                    label: unit,
+                limit = sensor.value > limit ? sensor.value : limit;
+                sensor.display = new JustGage({
+                    id: sensor.id,
+                    value: sensor.value,
+                    title: sensor.name,
+                    label: sensor.unit,
                     min: 0,
                     max: limit,
                     decimals: decimals
                 });
             }
             // now show the current gauge value - set gaugeMax newly if required
-            if (gauge[sensor] > display[sensor].txtMaximum) {
-                display[sensor].refresh(gauge[sensor], gauge[sensor]);
+            if (sensor.value > sensor.display.txtMaximum) {
+                sensor.display.refresh(sensor.value, sensor.value);
             }
-            display[sensor].refresh(gauge[sensor]);
+            sensor.display.refresh(sensor.value);
+            sensors[sensorId] = sensor;
             break;
 
           case "counter":

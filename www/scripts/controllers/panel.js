@@ -27,7 +27,7 @@ var client;
 
 var reconnectTimeout = 2e3;
 
-var port = 8083;
+var broker = location.hostname, port = 8083;
 
 var wsID = "FLM" + parseInt(Math.random() * 100, 10);
 
@@ -50,7 +50,7 @@ app.controller("PanelCtrl", function($scope) {
         });
     }
     function mqttConnect() {
-        client = new Paho.MQTT.Client(location.hostname, port, "", wsID);
+        client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,
             onSuccess: onConnect,
@@ -93,14 +93,15 @@ app.controller("PanelCtrl", function($scope) {
         var deviceID = topic[2];
         if (topic[3] == "config") {
             var config = JSON.parse(payload);
-            for (var i = 1; i <= 13; i++) {
-                if (config[i].enable == "1") {
-                    var sensorId = config[i].id;
+            for (var obj in config) {
+                var cfg = config[obj];
+                if (cfg.enable == "1") {
+                    var sensorId = cfg.id;
                     if (sensors[sensorId] == null) {
-                        sensors[sensorId] = new Object(sensorId);
-                        sensors[sensorId].id = config[i].id;
-                        sensors[sensorId].name = config[i].function;
-                    } else sensors[sensorId].name = config[i].function;
+                        sensors[sensorId] = new Object();
+                        sensors[sensorId].id = cfg.id;
+                        sensors[sensorId].name = cfg.function;
+                    } else sensors[sensorId].name = cfg.function;
                 }
             }
         }
@@ -110,7 +111,7 @@ app.controller("PanelCtrl", function($scope) {
         var msgType = topic[3];
         var sensorId = topic[2];
         if (sensors[sensorId] == null) {
-            sensors[sensorId] = new Object(sensorId);
+            sensors[sensorId] = new Object();
             sensor.id = sensorId;
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
