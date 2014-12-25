@@ -5,31 +5,36 @@
 ************************************************************ */
 // link to the web server's IP address for MQTT socket connection
 var client;
-var reconnectTimeout = 2000;
-var port = 8083; // the FLM's web socket port from mosquitto
-var wsID = "FLM" + parseInt(Math.random() * 100, 10); // get "different" websocketIDs
 
+var reconnectTimeout = 2e3;
+
+// the FLM's web socket port from mosquitto
+var broker = location.hostname, port = 8083;
+
+var wsID = "FLM" + parseInt(Math.random() * 100, 10);
+
+// get "different" websocketIDs
 function MQTTconnect() {
-	client = new Paho.MQTT.Client(location.hostname, port, "", wsID);
-	var options = {
-        	timeout : 3,
-		onSuccess : onConnect,
-		onFailure : function(message) { setTimeout(MQTTconnect, reconnectTimeout); }
-	};
-	// define callback routines
-	client.onConnectionLost = onConnectionLost;
-	client.onMessageArrived = onMessageArrived;
-	client.connect(options);
-};
+    client = new Paho.MQTT.Client(broker, port, "", wsID);
+    var options = {
+        timeout: 3,
+        onSuccess: onConnect,
+        onFailure: function(message) {
+            setTimeout(MQTTconnect, reconnectTimeout);
+        }
+    };
+    // define callback routines
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+    client.connect(options);
+}
 
 function onConnect() {
-	client.subscribe("/sensor/#");
-};
+    client.subscribe("/device/#");
+    client.subscribe("/sensor/#");
+}
 
 function onConnectionLost(responseObj) {
-	setTimeout(MQTTconnect, reconnectTimeout);
-	if (responseObj.errorCode !== 0)
-		console.log("onConnectionLost:" + responseObj.errorMessage);
-};
-
-// onMessageArrived is implemented in the distinct functionality files
+    setTimeout(MQTTconnect, reconnectTimeout);
+    if (responseObj.errorCode !== 0) console.log("onConnectionLost:" + responseObj.errorMessage);
+}
