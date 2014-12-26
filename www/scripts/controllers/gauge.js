@@ -28,12 +28,12 @@ var client;
 
 var reconnectTimeout = 2e3;
 
+// the FLM's web socket port from mosquitto
 var broker = location.hostname, port = 8083;
 
-// the FLM's web socket port from mosquitto
+// get "different" websocketIDs
 var wsID = "FLM" + parseInt(Math.random() * 100, 10);
 
-// get "different" websocketIDs
 var sensors = {}, numGauges = 0;
 
 var row = [];

@@ -55,6 +55,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         controller: 'GaugeCtrl',
         tagName: 'gauge'
       })
+      .when('/graph', {
+        templateUrl: 'views/graph.html',
+        controller: 'GraphCtrl',
+        tagName: 'graph'
+      })
       .when('/panel', {
         templateUrl: 'views/panel.html',
         controller: 'PanelCtrl',
