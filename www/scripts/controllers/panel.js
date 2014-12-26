@@ -149,6 +149,12 @@ app.controller("PanelCtrl", function($scope) {
                     break;
                 }
             }
+            // create and fill an array of last n gauge values
+            if (sensor.series == null) {
+                sensor.series = new Array();
+            }
+            if (sensor.series.length == 60) sensor.series.shift();
+            sensor.series.push(sensor.gaugevalue);
             break;
 
           case "counter":
@@ -160,6 +166,12 @@ app.controller("PanelCtrl", function($scope) {
           default:
             break;
         }
+        $("#sparkline" + sensor.id).sparkline(sensor.series, {
+            type: "line",
+            width: "200",
+            height: "50",
+            tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
+        });
         sensors[sensorId] = sensor;
     }
     mqttConnect();
