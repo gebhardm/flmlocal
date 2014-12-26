@@ -179,7 +179,10 @@ app.controller("GraphCtrl", function($scope) {
                     color++;
                     series.push(obj);
                     // add graph select option
-                    $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + sensor.name + "</label></small>" + "</div>");
+                    $("#choices").append("<tr><td class='checkbox'>" + 
+                                         "<small><label>" + 
+                                         "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + 
+                                         sensor.name + "</label></small>" + "</td></tr>");
                 } else {
                     obj[0].data.push([ timestamp, value[1] ]);
                     // move out values older than 5 minutes
@@ -237,9 +240,6 @@ app.controller("GraphCtrl", function($scope) {
         var height = width * 3 / 4;
         height = height > 600 ? 600 : height;
         $("#graph").width(width).height(height).offset({
-            left: offset
-        });
-        $("#choices").offset({
             left: offset
         });
         // compute hover
