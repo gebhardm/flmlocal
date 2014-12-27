@@ -1,4 +1,5 @@
 #FLM local visualizations
+This is a jQuery based implementation of a [Fluksometer](http://flukso.net) local visualization utilizing MQTT subscriptions with the [Paho JavaScript client](https://eclipse.org/paho/clients/js/).<br/>
 To get the capability to show a gauge, graph and panel
 from your [Fluksometer](http://flukso.net) directly (within the LAN, no internet access required), copy the content of the [www/](www/) folder to your FLM with firmware version >2.4.<br>
 Use the linux/OSX command **scp** for this purpose; for windows use WinSCP.
@@ -25,4 +26,5 @@ This code under [MIT license](LICENSE); all used libraries/includes with the res
 
 ##Credits
 The gauge uses [JustGage](http://justgage.com/), the graph is built using [Flot](http://www.flotcharts.org/) and the panel utilizes [jQuery Sparkline](http://omnipotent.net/jquery.sparkline/).<br/>
-Corresponding licenses are the [MIT license](http://opensource.org/licenses/mit-license.php) and the [New BSD license](http://opensource.org/licenses/BSD-3-Clause).
+Corresponding licenses are the [MIT license](http://opensource.org/licenses/mit-license.php) and the [New BSD license](http://opensource.org/licenses/BSD-3-Clause).<br/>
+All visualizations sit on top the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) under [Eclipse Public License](http://www.eclipse.org/legal/epl-v10.html).
