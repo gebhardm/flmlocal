@@ -17,9 +17,12 @@ in your browser.
 
 <img src="FLM_local_panel.png" width=500px>
 
-Note: The used library of the MQTT websockets connector *mqttws31.js* tends to lose connection due to an internal error - this needs to be investigated; for the moment by a built-in reconnect you should not experience any script stops; if you do, just refresh your browser window. Nevertheless the browser console will show (from time to time) following error message.
+Note: The used library of the MQTT websockets connector *mqttws31.js* tends to lose connection; for the moment by a built-in reconnect you should not experience any script stops; if you do, just refresh your browser window to reset the websocket. Nevertheless the browser console will show (from time to time) following error message.
 
 <img src="mqttws31_error.png" width=500px>
 
-This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted. 
+This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted (see below). 
 
+##Credits
+The gauge uses [JustGage](http://justgage.com/), the graph is built using [Flot](http://www.flotcharts.org/) and the panel utilizes [jQuery Sparkline](http://omnipotent.net/jquery.sparkline/).<br/>
+Corresponding licenses are the [MIT license](http://opensource.org/licenses/mit-license.php) and the [New BSD license](http://opensource.org/licenses/BSD-3-Clause).
