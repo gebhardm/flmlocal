@@ -170,7 +170,7 @@ app.controller("PanelCtrl", function($scope) {
             type: "line",
             width: "200",
             height: "50",
-            tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
+            tooltipFormat: '<span>{{x}}:{{y}}</span>'
         });
         sensors[sensorId] = sensor;
     }
