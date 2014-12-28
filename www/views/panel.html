@@ -9,20 +9,7 @@
 </div>
 <div class="panel panel-default">
     <div class="panel-body">
-        <table class="table table-striped">
-            <tr ng-repeat="row in sensors">
-                <td width=30%>
-                    <h4>{{row.name}}</h4>
-                    <small>{{row.gaugetimestamp}}</small>
-                </td>
-                <td align=middle>
-                    <span id="{{'sparkline'+row.id}}"></span>
-                </td>
-                <td width=30%>
-                    <h4>{{row.gaugevalue}} {{row.gaugeunit}}</h4>
-                    Total {{row.countervalue}} {{row.counterunit}}
-                </td>
-            </tr>
+        <table id="panel" class="table table-striped">
         </table>
     </div>
 </div>

@@ -152,6 +152,20 @@ app.controller("PanelCtrl", function($scope) {
             // create and fill an array of last n gauge values
             if (sensor.series == null) {
                 sensor.series = new Array();
+                var tablerow = "<tr>" + 
+                               '<td width="30%" style="vertical-align:middle;">' + 
+                               '<h4 id="sensor' + sensor.id + '"></h4>' + 
+                               '<small id="time' + sensor.id + '"><small>' + 
+                               "</td>" + 
+                               '<td style="vertical-align:middle;">' + 
+                               '<span id="sparkline' + sensor.id + '"></span>' + 
+                               "</td>" + 
+                               '<td width="30%" style="vertical-align:middle;">' + 
+                               '<h4 id="value' + sensor.id + '"></h4>' + 
+                               '<small id="counter' + sensor.id + '"></small>' + 
+                               "</td>" + 
+                               "</tr>";
+                $("#panel").append(tablerow);
             }
             if (sensor.series.length == 60) sensor.series.shift();
             sensor.series.push(sensor.gaugevalue);
@@ -166,16 +180,17 @@ app.controller("PanelCtrl", function($scope) {
           default:
             break;
         }
+        $("#sensor" + sensor.id).html(sensor.name);
+        $("#time" + sensor.id).html(sensor.gaugetimestamp);
+        $("#value" + sensor.id).html(sensor.gaugevalue + " " + sensor.gaugeunit);
         $("#sparkline" + sensor.id).sparkline(sensor.series, {
             type: "line",
             width: "200",
             height: "50",
             tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
         });
+        $("#counter" + sensor.id).html("Total " + sensor.countervalue + " " + sensor.counterunit);
         sensors[sensorId] = sensor;
-        $scope.$apply(function() {
-            $scope.sensors = sensors;
-        });
     }
     mqttConnect();
 });
