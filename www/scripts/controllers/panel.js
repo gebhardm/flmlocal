@@ -80,14 +80,14 @@ app.controller("PanelCtrl", function($scope) {
 
           case "sensor":
             handle_sensor(topic, payload);
-            $scope.message = mqttMsg.destinationName + ", " + payload;
+            $scope.$apply(function () {
+                $scope.message = mqttMsg.destinationName + ", " + payload;
+            });
             break;
 
           default:
             break;
         }
-        $scope.sensors = sensors;
-        $scope.$apply();
     }
     function handle_device(topic, payload) {
         var deviceID = topic[2];
@@ -110,12 +110,12 @@ app.controller("PanelCtrl", function($scope) {
         var sensor = {};
         var msgType = topic[3];
         var sensorId = topic[2];
+        var value = JSON.parse(payload);
         if (sensors[sensorId] == null) {
             sensors[sensorId] = new Object();
             sensor.id = sensorId;
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
-        var value = JSON.parse(payload);
         switch (msgType) {
           case "gauge":
             if (value.length == null) {
@@ -170,9 +170,12 @@ app.controller("PanelCtrl", function($scope) {
             type: "line",
             width: "200",
             height: "50",
-            tooltipFormat: '<span>{{x}}:{{y}}</span>'
+            tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
         });
         sensors[sensorId] = sensor;
+        $scope.$apply(function() {
+            $scope.sensors = sensors;
+        });
     }
     mqttConnect();
 });

@@ -179,10 +179,10 @@ app.controller("GraphCtrl", function($scope) {
                     color++;
                     series.push(obj);
                     // add graph select option
-                    $("#choices").append("<tr><td class='checkbox'>" + 
+                    $("#choices").append("<div class='checkbox'>" + 
                                          "<small><label>" + 
                                          "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + 
-                                         sensor.name + "</label></small>" + "</td></tr>");
+                                         sensor.name + "</label></small>" + "</div>");
                 } else {
                     obj[0].data.push([ timestamp, value[1] ]);
                     // move out values older than 5 minutes
