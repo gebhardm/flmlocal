@@ -160,14 +160,10 @@ $(function() {
         opacity: .9
     }).appendTo("body");
     // set plot area boundaries
-    var offset = 20;
-    //px
-    var width = $(document).width() - offset * 2;
+    var width = $("#graphpanel").width();
     var height = width * 3 / 4;
     height = height > 600 ? 600 : height;
-    $("#graph").width(width).height(height).offset({
-        left: offset
-    });
+    $("#graph").width(width).height(height);
     // compute hover
     $("#graph").on("plothover", function(event, pos, item) {
         if (item) {
