@@ -179,10 +179,7 @@ app.controller("GraphCtrl", function($scope) {
                     color++;
                     series.push(obj);
                     // add graph select option
-                    $("#choices").append("<div class='checkbox'>" + 
-                                         "<small><label>" + 
-                                         "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + 
-                                         sensor.name + "</label></small>" + "</div>");
+                    $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + sensor.name + "</label></small>" + "</div>");
                 } else {
                     obj[0].data.push([ timestamp, value[1] ]);
                     // move out values older than 5 minutes
@@ -233,15 +230,12 @@ app.controller("GraphCtrl", function($scope) {
             padding: "2px",
             opacity: .9
         }).appendTo("body");
-        // set plot area boundaries
-        var offset = 20;
-        //px
-        var width = $(document).width() - offset * 2;
+        // compute graph boundaries
+        var offset = 15;
+        var width = $("#graphpanel").width() - 2 * offset;
         var height = width * 3 / 4;
         height = height > 600 ? 600 : height;
-        $("#graph").width(width).height(height).offset({
-            left: offset
-        });
+        $("#graph").width(width).height(height);
         // compute hover
         $("#graph").on("plothover", function(event, pos, item) {
             if (item) {
