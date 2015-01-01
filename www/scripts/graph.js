@@ -144,6 +144,11 @@ function handle_sensor(topic, payload) {
         });
         selSeries.push(s[0]);
     });
+    // set plot area boundaries
+    var width = $("#graphpanel").width();
+    var height = width * 3 / 4;
+    height = height > 600 ? 600 : height;
+    $("#graph").width(width).height(height);
     // plot the selection
     $.plot("#graph", selSeries, options);
     // and store the sensor configuration
@@ -159,11 +164,6 @@ $(function() {
         padding: "2px",
         opacity: .9
     }).appendTo("body");
-    // set plot area boundaries
-    var width = $("#graphpanel").width();
-    var height = width * 3 / 4;
-    height = height > 600 ? 600 : height;
-    $("#graph").width(width).height(height);
     // compute hover
     $("#graph").on("plothover", function(event, pos, item) {
         if (item) {
