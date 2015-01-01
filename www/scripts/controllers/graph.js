@@ -216,6 +216,11 @@ app.controller("GraphCtrl", function($scope) {
             selSeries.push(s[0]);
         });
         // plot the selection
+        // compute graph boundaries
+        var width = $("#graphpanel").width();
+        var height = width * 3 / 4;
+        height = height > 600 ? 600 : height;
+        $("#graph").width(width).height(height);
         $.plot("#graph", selSeries, flotOptions);
         // and store the sensor configuration
         sensors[sensorId] = sensor;
@@ -230,13 +235,7 @@ app.controller("GraphCtrl", function($scope) {
             padding: "2px",
             opacity: .9
         }).appendTo("body");
-        // compute graph boundaries
-        var offset = 15;
-        var width = $("#graphpanel").width() - 2 * offset;
-        var height = width * 3 / 4;
-        height = height > 600 ? 600 : height;
-        $("#graph").width(width).height(height);
-        // compute hover
+        // assign hover function
         $("#graph").on("plothover", function(event, pos, item) {
             if (item) {
                 var itemTime = new Date(item.datapoint[0]);
