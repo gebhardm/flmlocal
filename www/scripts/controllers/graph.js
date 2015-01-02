@@ -152,39 +152,64 @@ app.controller("GraphCtrl", function($scope) {
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
         var value = JSON.parse(payload);
+        var now = new Date().getTime();
+        var diff = 0;
         // now compute the gauge
         switch (msgType) {
           case "gauge":
-            // process currently only the FLM delivered values with timestamp
-            if (value.length == 3) {
-                // check time difference of received value to current time
-                // this is due to pulses being send on occurance, so potentially outdated
-                var now = new Date().getTime();
-                var diff = now / 1e3 - value[0];
-                // drop values that are older than 10 sec - as this is a realtime view
-                if (diff > 100) break;
+            if (value.length == null) {
+                sensor.gaugetimestamp = now;
+                sensor.gaugevalue = value;
+                sensor.gaugeunit = "";
+            } else {
+                switch (value.length) {
+                  case 1:
+                    sensor.gaugetimestamp = now;
+                    sensor.gaugevalue = value[0];
+                    sensor.gaugeunit = "";
+                    break;
+
+                  case 2:
+                    sensor.gaugetimestamp = now;
+                    sensor.gaugevalue = value[0];
+                    sensor.gaugeunit = value[1];
+                    break;
+
+                  case 3:
+                    // check time difference of received value to current time
+                    // this is due to pulses being send on occurance, so potentially outdated
+                    diff = now / 1e3 - value[0];
+                    // flot.time requires UTC-like timestamps;
+                    // see https://github.com/flot/flot/blob/master/API.md#time-series-data
+                    sensor.gaugetimestamp = value[0] * 1e3;
+                    sensor.gaugevalue = value[1];
+                    sensor.gaugeunit = value[2];
+                    break;
+
+                  default:
+                    break;
+                }
                 // check if current sensor was already registered
                 var obj = series.filter(function(o) {
                     return o.label == sensor.name;
                 });
-                // flot.time requires UTC-like timestamps;
-                // see https://github.com/flot/flot/blob/master/API.md#time-series-data
-                var timestamp = value[0] * 1e3;
+                // if time difference is too large, skip gauge
+                if (diff > 100) break;
                 // ...if current sensor does not exist yet, register it
                 if (obj[0] == null) {
                     obj = {};
                     obj.label = sensor.name;
-                    obj.data = [ timestamp, value[1] ];
+                    obj.data = [ sensor.gaugetimestamp, sensor.gaugevalue ];
                     obj.color = color;
                     color++;
                     series.push(obj);
                     // add graph select option
                     $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + sensor.name + "' checked='checked'></input>" + sensor.name + "</label></small>" + "</div>");
                 } else {
-                    obj[0].data.push([ timestamp, value[1] ]);
+                    obj[0].data.push([ sensor.gaugetimestamp, sensor.gaugevalue ]);
                     // move out values older than 5 minutes
                     var limit = parseInt(obj[0].data[0]);
-                    diff = (timestamp - limit) / 1e3;
+                    diff = (sensor.gaugetimestamp - limit) / 1e3;
                     if (diff > 300) {
                         var selGraph = new Array();
                         for (var i in series) {
@@ -194,13 +219,12 @@ app.controller("GraphCtrl", function($scope) {
                                 return v[0] > limit;
                             });
                             selObj.color = series[i].color;
-                            selGraph.push(selObj);
+                            if (selObj.data != null) selGraph.push(selObj);
                         }
                         series = selGraph;
                     }
                 }
             }
-            // if length
             break;
 
           default:
@@ -245,7 +269,11 @@ app.controller("GraphCtrl", function($scope) {
                 min = min < 10 ? "0" + min : min;
                 var sec = itemTime.getSeconds();
                 sec = sec < 10 ? "0" + sec : sec;
-                $("#tooltip").html(hrs + ":" + min + ":" + sec + " : " + item.datapoint[1]).css({
+                var unit = "";
+                for (var s in sensors) {
+                    if (sensors[s].name == item.series.label) unit = sensors[s].gaugeunit;
+                }
+                $("#tooltip").html(item.series.label + " (" + hrs + ":" + min + ":" + sec + "): " + item.datapoint[1] + " " + unit).css({
                     top: item.pageY + 7,
                     left: item.pageX + 5
                 }).fadeIn(200);
