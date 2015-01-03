@@ -4,38 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FLM web interface via MQTT websockets">
-    <title>Fluksometer Realtime Graph</title>
+    <title>Fluksometer Realtime Panel</title>
     <!-- Bootstrap core CSS -->
-    <link href="styles/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery -->
-    <script type="text/javascript" src="scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../components/jquery/jquery.min.js"></script>
     <!-- web socket communication -->
-    <script type="text/javascript" src="scripts/mqttws31.js"></script>
-    <!-- Graph display -->
-    <script type="text/javascript" src="scripts/jquery.flot.js"></script>
-    <script type="text/javascript" src="scripts/jquery.flot.time.js"></script>
-    <!-- this page's functionality -->
-    <script type="text/javascript" src="scripts/buttons.js"></script>
-    <script type="text/javascript" src="scripts/mqttwsconnect.js"></script>
-    <script type="text/javascript" src="scripts/graph.js"></script>
+    <script type="text/javascript" src="../components/mqttws/mqttws31.js"></script>	
+    <!-- Sparkline - for inline graphics -->
+    <script type="text/javascript" src="../components/jquery/jquery.sparkline.min.js"></script>
+    <!-- last not least the FLM logic -->
+    <script type="text/javascript" src="../scripts/controllers/buttons.js"></script>
+    <script type="text/javascript" src="../components/mqttws/mqttwsconnect.js"></script>
+    <script type="text/javascript" src="../scripts/controllers/panel.js"></script>
   </head>
-
   <body>
     <div id="wrap">
       <div class="container">
         <div class="page-header">
-          <h1>FluksoGraph</h1>
+          <h1>FluksoPanel</h1>
         </div>
-	<div class="panel panel-default">
-	  <div class="panel-body" id="graphpanel">
-            <div id="graph">
-            </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <table id="gauge" class="table table-striped">
+            </table>
           </div>
         </div>
-	<div class="panel panel-default">
-	  <div class="panel-body" id="choices">
-	  </div>
-	</div>
         <div class="panel panel-default">
           <div class="panel-body">
             <b>Latest MQTT message: </b> <small id="message">no message received</small>
@@ -43,7 +37,7 @@
         </div>
         <div class="footer">
           <small>
-            <p class="text-center">FLM <a href="http://github.com/gebhardm/flmdisplay">Graph Display</a> &copy; 2014</p>
+            <p class="text-center">FLM MQTT Panel, based on <a href="http://github.com/fabaff/mqtt-panel">mqtt-panel</a> with the corresponding &copy;</p>
           </small>
         </div>
         <div class="panel-body" align="center">
