@@ -271,7 +271,10 @@ app.controller("GraphCtrl", function($scope) {
                 sec = sec < 10 ? "0" + sec : sec;
                 var unit = "";
                 for (var s in sensors) {
-                    if (sensors[s].name == item.series.label) unit = sensors[s].gaugeunit;
+                    if (sensors[s].name == item.series.label) {
+                        unit = sensors[s].gaugeunit;
+                        break;
+                    }
                 }
                 $("#tooltip").html(item.series.label + " (" + hrs + ":" + min + ":" + sec + "): " + item.datapoint[1] + " " + unit).css({
                     top: item.pageY + 7,
