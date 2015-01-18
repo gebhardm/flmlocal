@@ -21,6 +21,51 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+"use strict";
+
+// link to the web server's IP address for MQTT socket connection
+var client;
+
+var reconnectTimeout = 2e3;
+
+// the FLM's web socket port from mosquitto
+var broker = location.hostname, port = 8083;
+
+// get "different" websocketIDs
+var wsID = "FLM" + parseInt(Math.random() * 100, 10);
+
+// prepare graph display
+// the received values
+var series = new Array(), sensors = {};
+
+// the selected series to show
+var selSeries = new Array();
+
+var color = 0;
+
+var flotOptions = {
+    series: {
+        lines: {
+            show: true,
+            steps: true
+        },
+        points: {
+            show: false
+        }
+    },
+    grid: {
+        hoverable: true
+    },
+    xaxis: {
+        mode: "time",
+        timezone: "browser"
+    },
+    yaxis: {
+        min: 0
+    }
+};
+
+// the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
 
 app.controller("GraphCtrl", function($scope) {
