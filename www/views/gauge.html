@@ -1,3 +1,4 @@
+<<<<<<< ours
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -50,3 +51,37 @@
     </div>
   </body>
 </html>
+=======
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<!-- use the Twitter bootstrap styles -->
+<link href="styles/bootstrap.min.css" rel="stylesheet">
+<div class="page-header">
+    <h1>FluksoGauges</h1>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="gauge" class="table table-striped">
+            <tr ng-repeat="row in gauges">
+                <td ng-repeat="col in row" width=50%>
+                    <div id="{{col.id}}"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <small><b>Latest MQTT message: </b>{{message}}</small>
+    </div>
+</div>
+<div class="footer">
+    <small>
+        <p class="text-center">
+        FLM <a href="http://github.com/gebhardm/flmlocal">Gauge Display</a> &copy; 2014
+        </p>
+    </small>
+</div>
+>>>>>>> theirs
