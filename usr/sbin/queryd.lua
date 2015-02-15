@@ -36,7 +36,7 @@ local ub = assert(ubus.connect(), "unable to connect to ubus")
 local mosq = require "mosquitto"
 
 local DEBUG = {
-	query = false
+	query = true
 }
 
 local DAEMON = os.getenv("DAEMON") or "queryd"
@@ -52,7 +52,7 @@ local TMPO_BASE_PATH = "/usr/share/tmpo/sensor/"
 local TMPO_PATH_TPL = TMPO_BASE_PATH .. "%s/%s/%s/%s" -- [sid]/[rid]/[lvl]/[bid]
 local TMPO_REGEX_QUERY = "^/query/(%x+)/tmpo$"
 local TMPO_TOPIC_QUERY_PUB = "/sensor/%s/query" -- provide queried data as payload
-local TMPO_TOPIC_QUERY_SUB = "/query/+" -- get sensor to query with payload interva
+local TMPO_TOPIC_QUERY_SUB = "/query/+/tmpo" -- get sensor to query with payload interval
 local TMPO_FMT_QUERY = "time:%d sid:%s rid:%d lvl:%2d bid:%d"
 
 -- mosquitto client params
@@ -63,8 +63,9 @@ local MOSQ_PORT = 1883
 local MOSQ_KEEPALIVE = 900
 local MOSQ_TIMEOUT = 0 -- return instantly from select call
 local MOSQ_MAX_PKTS = 1 -- packets
-local MOSQ_QOS0 = 0
-local MOSQ_QOS1 = 1
+local MOSQ_QOS0 = 0 -- at most once
+local MOSQ_QOS1 = 1 -- at least once
+local MOSQ_QOS2 = 2 -- exactly once
 local MOSQ_RETAIN = true
 local MOSQ_ERROR = "MQTT error: %s"
 
@@ -98,19 +99,38 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 		end
 	end
 
+	local function publish(sid, rid, lvl, bid)
+		dprint(TMPO_FMT_QUERY, sid, rid, lvl, bid)
+		local path = TMPO_PATH_TPL:format(sid, rid, lvl, bid)
+		local source = assert(io.open(path, "r"))
+		local payload = source:read("*all")
+		local topic = TMPO_TOPIC_QUERY_PUB:format(sid)
+		if DEBUG.query then
+			print("publishing", topic, payload)
+		end
+		mqtt:publish(topic, payload, MOSQ_QOS2, not MOSQ_RETAIN)
+		source:close()
+	end
+
 	-- publish the stored files on a query request
 	local function query(sid)
-		-- payload contains query time interval {from:fromtimestamp, to:totimestamp}
+		-- payload contains query time interval [fromtimestamp, totimestamp]
 		local payload = luci.json.decode(jpayload)
+		local lastbid = 0
+		if DEBUG.query then
+			print("entered query with ", sid, payload[1], payload[2])
+		end
 		for rid in nixio.fs.dir(TMPO_BASE_PATH .. sid) do
 			for _, lvl in ipairs(sdir(TMPO_PATH_TPL:format(sid, rid, "", ""))) do
 				for _, bid in ipairs(sdir(TMPO_PATH_TPL:format(sid, rid, lvl, ""))) do
-					if bid >= payload.from and bid <= payload.to
-						-- publish the respective file containing the requested values
-						-- note, the query interval may be smaller than a file's content
-						-- then the respective file must be sent
-						dprint(TMPO_FMT_QUERY, sid, rid, lvl, bid)
+					-- detect store with containing or overlapping values
+					if ((payload[1] <= bid) and (bid <= payload[2])) then
+                                                publish(sid, rid, lvl, bid)
 					end
+					if ((lastbid ~= 0) and (bid >= payload[2]) and (lastbid <= payload[1])) then
+						publish(sid, rid, lvl, lastbid)
+                                        end
+					lastbid = bid
 				end
 			end
 		end
