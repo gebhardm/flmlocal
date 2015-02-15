@@ -36,7 +36,7 @@ local ub = assert(ubus.connect(), "unable to connect to ubus")
 local mosq = require "mosquitto"
 
 local DEBUG = {
-	query = true
+	query = false
 }
 
 local DAEMON = os.getenv("DAEMON") or "queryd"

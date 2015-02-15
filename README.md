@@ -35,6 +35,23 @@ Note that here the `<sensor id>` is taken as name as long as you are not publish
 
 <img src="FLMlocalPanel.png" width=500px>
  
+## Querying TMPO data
+With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) exists a first version of a query daemon capable to retrieve FLM locally stored tmpo files; this may be used for an arbitrary chart without having to store data on an external database. The daemon works as follows:
+
+Sending a MQTT message to the FLM's MQTT broker with following content
+
+    topic: /query/<sid>/tmpo
+    payload: [<fromtimestamp>, <totimestamp>]
+    
+will be computed by the query daemon (run it on the FLM with **lua queryd.lua** without having to install a real daemon for now). Corresponding to the sent query time interval (use the same timestamp format as provided by the /sensor-topics) one or more fitting tmpo files will be retreived and sent back to
+
+    topic: /sensor/<sid>/query
+    payload: <gzipped tmpo file>
+    
+The content of the queried data may directly be computed with a Javascript in a browser or by using [https://github.com/gebhardm/flmdisplay/tree/master/tmpo](https://github.com/gebhardm/flmdisplay/tree/master/tmpo) - note that the topic must be altered accordingly.
+
+As this is a first proof of concept, there will be more; as the sent back MQTT query message might be delayed, another idea is to pass the queried content directly to a websocket using the built-in visualization options.
+ 
 ##Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
 
