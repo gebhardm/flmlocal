@@ -43,12 +43,12 @@ Sending a MQTT message to the FLM's MQTT broker with following content
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (run it on the FLM with **lua queryd.lua** without having to install a real daemon for now). Corresponding to the sent query time interval (use the same timestamp format as provided by the /sensor-topics) one or more fitting tmpo files will be retreived and sent back to
+will be computed by the query daemon (run it on the FLM with **lua queryd.lua** without having to install a real daemon for now). Corresponding to the sent query time interval (use the same timestamp format as provided by the /sensor-topics) one or more fitting tmpo files will be retrieved and sent back to
 
-    topic: /sensor/<sid>/query
+    topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
     
-The content of the queried data may directly be computed with a Javascript in a browser or by using [https://github.com/gebhardm/flmdisplay/tree/master/tmpo](https://github.com/gebhardm/flmdisplay/tree/master/tmpo) - note that the topic must be altered accordingly.
+The content of the queried data may directly be computed with a Javascript script in a browser or by using [https://github.com/gebhardm/flmdisplay/tree/master/tmpo](https://github.com/gebhardm/flmdisplay/tree/master/tmpo) - note that the topic must be altered accordingly.
 
 As this is a first proof of concept, there will be more; as the sent back MQTT query message might be delayed, another idea is to pass the queried content directly to a websocket using the built-in visualization options.
  
