@@ -35,6 +35,9 @@ var broker = "192.168.0.50", port = 8083;
 // chart data to display and selected details
 var chart = new Array(), selChart = new Array();
 
+// chart colors
+var color = 0;
+
 // detected sensor configurations
 var sensors = {};
 
@@ -149,23 +152,20 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
-        // clear any existing series
-        chart = [];
-        // format the data object
-        var color = 0;
-        /*
-    for (var i in res) {
+        var gunzip = new Zlib.Gunzip(payload);
+        var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         var serobj = {};
-        serobj.label = i;
-        serobj.data = res[i];
+        serobj.label = tmpo.h.cfg.function;
         serobj.color = color;
+        serobj.data = [];
         color++;
+        serobj.data.push([ tmpo.h.head[0], tmpo.h.head[1] ]);
+        for (var i = 1; i < tmpo.v.length; i++) {
+            serobj.data.push([ serobj.data[i - 1][0] + tmpo.t[i], serobj.data[i - 1][1] + tmpo.v[i] ]);
+        }
         chart.push(serobj);
         // add graph selection option
-        $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + i + "' checked='checked'></input>" + i + "</label></small>" + "</div>");
-    }
-*/
-        //for
+        $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + serobj.label + "' checked='checked'></input>" + serobj.label + "</label></small>" + "</div>");
         // process the chart selection
         $("#choices").find("input").on("click", plotSelChart);
         function plotSelChart() {
@@ -288,6 +288,8 @@ app.controller("ChartCtrl", function($scope) {
             msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
             client.send(msg);
         }
+        chart = [];
+        color = 0;
     }
     mqttConnect();
 });
