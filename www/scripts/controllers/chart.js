@@ -29,8 +29,7 @@ var client;
 var reconnectTimeout = 2e3;
 
 // the FLM's web socket port from mosquitto
-//var broker = location.hostname, port = 8083;
-var broker = "192.168.0.50", port = 8083;
+var broker = location.hostname, port = 8083;
 
 // chart data to display and selected details
 var chart = new Array(), selChart = new Array();
@@ -159,9 +158,9 @@ app.controller("ChartCtrl", function($scope) {
         serobj.color = color;
         serobj.data = [];
         color++;
-        serobj.data.push([ tmpo.h.head[0], tmpo.h.head[1] ]);
+        serobj.data.push([ tmpo.h.head[0], tmpo.v[0] ]);
         for (var i = 1; i < tmpo.v.length; i++) {
-            serobj.data.push([ serobj.data[i - 1][0] + tmpo.t[i], serobj.data[i - 1][1] + tmpo.v[i] ]);
+            serobj.data.push([ (serobj.data[i - 1][0] / 1e3 + tmpo.t[i]) * 1e3, tmpo.v[i] * 3600 / tmpo.t[i] ]);
         }
         chart.push(serobj);
         // add graph selection option
@@ -275,15 +274,12 @@ app.controller("ChartCtrl", function($scope) {
     }).appendTo("body");
     // emit the query request to the server part
     function emit() {
-        var data = [];
-        var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3;
-        var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3;
         var offset = new Date().getTimezoneOffset() * 60;
-        data.push(from + offset);
-        data.push(to + offset);
+        var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3 + offset;
+        var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3 + offset;
         $("#chart").html("");
         $("#info").html("<p class='text-center'>Loading</p>");
-        var msg = new Paho.MQTT.Message("[" + data.toString() + "]");
+        var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
         for (var s in sensors) {
             msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
             client.send(msg);
