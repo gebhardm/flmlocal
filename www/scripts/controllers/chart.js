@@ -153,18 +153,30 @@ app.controller("ChartCtrl", function($scope) {
     function handle_sensor(topic, payload) {
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
-        var serobj = {};
-        serobj.label = tmpo.h.cfg.function;
-        serobj.color = color;
-        serobj.data = [];
-        color++;
-        serobj.data.push([ tmpo.h.head[0], tmpo.v[0] ]);
+        var newSeries = true;
+        var data = [];
+        data.push([ tmpo.h.head[0] * 1e3, tmpo.v[0] ]);
         for (var i = 1; i < tmpo.v.length; i++) {
-            serobj.data.push([ (serobj.data[i - 1][0] / 1e3 + tmpo.t[i]) * 1e3, tmpo.v[i] * 3600 / tmpo.t[i] ]);
+            data.push([ (data[i - 1][0] / 1e3 + tmpo.t[i]) * 1e3, tmpo.v[i] * 3600 / tmpo.t[i] ]);
         }
-        chart.push(serobj);
-        // add graph selection option
-        $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + serobj.label + "' checked='checked'></input>" + serobj.label + "</label></small>" + "</div>");
+        data.shift();
+        // check if chart has to be altered or a new series has to be added
+        for (var c = 0; c < chart.length; c++) {
+            if (chart[c].label == tmpo.h.cfg.function) {
+                chart[c].data.concat(data);
+                newSeries = false;
+            }
+        }
+        if (newSeries) {
+            var serobj = {};
+            serobj.label = tmpo.h.cfg.function;
+            serobj.color = color;
+            serobj.data = data;
+            color++;
+            chart.push(serobj);
+            // add graph selection option
+            $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + serobj.label + "' checked='checked'></input>" + serobj.label + "</label></small>" + "</div>");
+        }
         // process the chart selection
         $("#choices").find("input").on("click", plotSelChart);
         function plotSelChart() {
