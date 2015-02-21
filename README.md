@@ -43,9 +43,9 @@ Sending a MQTT message to the FLM's MQTT broker with following content
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used) one or more fitting tmpo files are retreived and sent back to
+will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - tmpod.lua integration is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used) one or more fitting tmpo files are retrieved and sent back to
 
-    topic: /sensor/<sid>/query
+    topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
     
 The content of the queried data then is computed with a Javascript script in the browser and displayed using with Flot charts like in the graph.
