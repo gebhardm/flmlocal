@@ -50,6 +50,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         controller: 'SyslogCtrl',
         tagName: 'syslog'
       })
+      .when('/chart', {
+        templateUrl: 'views/chart.html',
+        controller: 'ChartCtrl',
+        tagName: 'chart'
+      })
       .when('/gauge', {
         templateUrl: 'views/gauge.html',
         controller: 'GaugeCtrl',
