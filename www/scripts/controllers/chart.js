@@ -176,6 +176,11 @@ app.controller("ChartCtrl", function($scope) {
             for (var i = 0; i < data.length; i++) {
                 obj[0].data.push(data[i]);
             }
+            obj[0].data.sort(function(a, b) {
+                var x = a[0];
+                var y = b[0];
+                return y - x;
+            });
         }
         // process the chart selection
         $("#choices").find("input").on("click", plotSelChart);
