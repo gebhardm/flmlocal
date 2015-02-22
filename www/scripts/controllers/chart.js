@@ -29,7 +29,9 @@ var client;
 var reconnectTimeout = 2e3;
 
 // the FLM's web socket port from mosquitto
-var broker = location.hostname, port = 8083;
+var broker = location.hostname;
+
+var port = 8083;
 
 // chart data to display and selected details
 var chart = new Array(), selChart = new Array();
@@ -157,11 +159,13 @@ app.controller("ChartCtrl", function($scope) {
         var qfrom = topic[4] * 1e3;
         var qto = topic[5] * 1e3;
         var qtime = tmpo.h.head[0] * 1e3;
+        var qval;
         data.push([ qtime, tmpo.v[0] ]);
-        for (var i = 1; i < tmpo.v.length; i++) {
+        for (var i = 3; i < tmpo.v.length - 2; i++) {
             qtime += tmpo.t[i] * 1e3;
             if (qfrom <= qtime && qtime <= qto) {
-                data.push([ qtime, Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10 ]);
+                qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
+                data.push([ qtime, qval ]);
             }
         }
         data.shift();
