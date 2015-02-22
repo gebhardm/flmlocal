@@ -153,19 +153,31 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
+        var data = new Array(), qfrom, qto, qtime, qval, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
-        var data = [];
-        var qfrom = topic[4] * 1e3;
-        var qto = topic[5] * 1e3;
-        var qtime = tmpo.h.head[0] * 1e3;
-        var qval;
+        data = [];
+        qfrom = topic[4] * 1e3;
+        qto = topic[5] * 1e3;
+        qtime = tmpo.h.head[0] * 1e3;
         data.push([ qtime, tmpo.v[0] ]);
-        for (var i = 3; i < tmpo.v.length - 2; i++) {
-            qtime += tmpo.t[i] * 1e3;
-            if (qfrom <= qtime && qtime <= qto) {
-                qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
-                data.push([ qtime, qval ]);
+        // handle shorter sets of values
+        if (tmpo.v.length < 6) {
+            for (i = 1; i < tmpo.v.length; i++) {
+                qtime += tmpo.t[i] * 1e3;
+                if (qfrom <= qtime && qtime <= qto) {
+                    qval = Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10;
+                    data.push([ qtime, qval ]);
+                }
+            }
+        } else {
+            // perform a rolling average on the data
+            for (i = 3; i < tmpo.v.length - 2; i++) {
+                qtime += tmpo.t[i] * 1e3;
+                if (qfrom <= qtime && qtime <= qto) {
+                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
+                    data.push([ qtime, qval ]);
+                }
             }
         }
         data.shift();
