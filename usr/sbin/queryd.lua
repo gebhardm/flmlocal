@@ -119,6 +119,7 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 		-- payload contains query time interval [fromtimestamp, totimestamp]
 		local payload = luci.json.decode(jpayload)
 		if payload == nil then return end
+                local lastlvl = 0
 		local lastbid = 0
 		local from = payload[1]
 		local to = payload[2]
@@ -133,8 +134,9 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
                                                 publish(sid, rid, lvl, bid, from, to)
 					end
 					if ((lastbid ~= 0) and (lastbid < from) and (bid > from)) then
-						publish(sid, rid, lvl, lastbid, from, to)
+						publish(sid, rid, lastlvl, lastbid, from, to)
                                         end
+                                        lastlvl = lvl
 					lastbid = bid
 				end
 			end
