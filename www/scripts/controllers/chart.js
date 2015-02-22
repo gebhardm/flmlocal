@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2014 Markus Gebhard <markus.gebhard@web.de>
+Copyright (c) 2015 Markus Gebhard <markus.gebhard@web.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -154,9 +154,15 @@ app.controller("ChartCtrl", function($scope) {
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         var data = [];
-        data.push([ tmpo.h.head[0] * 1e3, tmpo.v[0] ]);
+        var qfrom = topic[4] * 1e3;
+        var qto = topic[5] * 1e3;
+        var qtime = tmpo.h.head[0] * 1e3;
+        data.push([ qtime, tmpo.v[0] ]);
         for (var i = 1; i < tmpo.v.length; i++) {
-            data.push([ (data[i - 1][0] / 1e3 + tmpo.t[i]) * 1e3, Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10 ]);
+            qtime += tmpo.t[i] * 1e3;
+            if (qfrom <= qtime && qtime <= qto) {
+                data.push([ qtime, Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10 ]);
+            }
         }
         data.shift();
         // check if chart has to be altered or a new series has to be added
