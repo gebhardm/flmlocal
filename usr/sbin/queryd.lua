@@ -54,6 +54,7 @@ local TMPO_REGEX_QUERY = "^/query/(%x+)/tmpo$"
 local TMPO_TOPIC_QUERY_PUB = "/sensor/%s/query/%s/%s" -- provide queried data as payload
 local TMPO_TOPIC_QUERY_SUB = "/query/+/tmpo" -- get sensor to query with payload interval
 local TMPO_FMT_QUERY = "time:%d sid:%s rid:%d lvl:%2d bid:%d"
+local TMPO_LVLS_REVERSE = { 20, 16, 12, 8 } -- query runs from the past to now...
 
 -- mosquitto client params
 local MOSQ_ID = DAEMON
@@ -127,7 +128,7 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 			print("entered query with ", sid, from, to)
 		end
 		for rid in nixio.fs.dir(TMPO_BASE_PATH .. sid) do
-			for _, lvl in ipairs(sdir(TMPO_PATH_TPL:format(sid, rid, "", ""))) do
+			for _, lvl in ipairs(TMPO_LVLS_REVERSE) do
 				for _, bid in ipairs(sdir(TMPO_PATH_TPL:format(sid, rid, lvl, ""))) do
 					-- detect store with containing or overlapping values
 					if ((from <= bid) and (bid <= to)) then
