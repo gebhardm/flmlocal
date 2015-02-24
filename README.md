@@ -48,10 +48,12 @@ will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/que
     topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
     
-The content of the queried data then is computed with a Javascript script in the browser and displayed using with Flot charts like in the graph.
+The content of the queried data then is computed with a Javascript script in the browser and displayed using Flot charts like in the FluksoGraph. For smoothing the graphs (it is shown the first derivative with respect to time - actually a "simple difference calculation") a rolling average of five values is displayed; yet there are "bumps" due to the discreteness and approximation of the value set.
 
 <img src="FLMlocalChart.png" width=500px>
- 
+
+You may select by mouse details from a  smaller time interval; also you may switch on and off the different graphs in the chart using the checkboxes underneath.
+
 ##Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
 
