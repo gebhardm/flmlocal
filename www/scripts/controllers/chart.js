@@ -153,41 +153,70 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
-        var data = new Array(), qfrom, qto, qtime, qval, i;
+        var data = new Array(), qfrom, qto, qtime, qcntr, qval, qunit, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         data = [];
+        cntr = [];
+        switch (tmpo.h.cfg.type) {
+          case "electricity":
+            qunit = "W";
+            break;
+
+          case "water":
+            qunit = "l";
+            break;
+
+          case "gas":
+            qunit = "l";
+            break;
+
+          case "temperature":
+            qunit = "°C";
+            break;
+
+          default:
+            qunit = "";
+            break;
+        }
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
         qtime = tmpo.h.head[0] * 1e3;
+        qcntr = tmpo.v[0];
+        qtype = tmpo.h.cfg.type;
         data.push([ qtime, tmpo.v[0] ]);
         // handle shorter sets of values
         if (tmpo.v.length < 6) {
             for (i = 1; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
+                qcntr += tmpo.v[i];
                 if (qfrom <= qtime && qtime <= qto) {
                     qval = Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10;
                     data.push([ qtime, qval ]);
+                    cntr.push([ qtime, qcntr ]);
                 }
             }
         } else {
+            qcntr += tmpo.v[1] + tmpo.v[2];
             // perform a rolling average on the data
             for (i = 3; i < tmpo.v.length - 2; i++) {
                 qtime += tmpo.t[i] * 1e3;
+                qcntr += tmpo.v[i];
                 if (qfrom <= qtime && qtime <= qto) {
                     qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
                     data.push([ qtime, qval ]);
+                    data.push([ qtime, qcntr ]);
                 }
             }
         }
         data.shift();
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
-            return o.label == tmpo.h.cfg.function;
+            return o.label == tmpo.h.cfg.function + " (" + qunit + ")";
         });
         if (obj[0] == null) {
             obj = {};
-            obj.label = tmpo.h.cfg.function;
+            obj.label = tmpo.h.cfg.function + " (" + qunit + ")";
             obj.data = data;
             obj.color = color;
             color++;
