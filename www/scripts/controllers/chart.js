@@ -153,7 +153,10 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
+	// "real-time" data
         var data = new Array();
+	// counter data
+        var cntr = new Array();
         var qfrom, qto, qtime, qcntr, qval, qunit, qfact = 36e3, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
