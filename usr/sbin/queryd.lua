@@ -107,7 +107,8 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 		local payload = source:read("*all")
 		local topic = TMPO_TOPIC_QUERY_PUB:format(sid, from, to)
 		if DEBUG.query then
-			print("publishing", topic, payload)
+			local str = string.format("publishing topic:%s payload:%s", topic, payload)
+			print(str)
 		end
 		-- query is published exactly once - QoS = 2
 		mqtt:publish(topic, payload, MOSQ_QOS2, not MOSQ_RETAIN)
@@ -120,12 +121,15 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 		-- payload contains query time interval [fromtimestamp, totimestamp]
 		local payload = luci.json.decode(jpayload)
 		if payload == nil then return end
+                local lastrid = 0
                 local lastlvl = 0
 		local lastbid = 0
+		local published = false
 		local from = payload[1]
 		local to = payload[2]
 		if DEBUG.query then
-			print("entered query with ", sid, from, to)
+			local str = string.format("entered sensor:%s from:%s to:%s", sid, from, to)
+			print(str)
 		end
 		for rid in nixio.fs.dir(TMPO_BASE_PATH .. sid) do
 			for _, lvl in ipairs(TMPO_LVLS_REVERSE) do
@@ -133,14 +137,24 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 					-- detect store with containing or overlapping values
 					if ((from <= bid) and (bid <= to)) then
                                                 publish(sid, rid, lvl, bid, from, to)
+						published = true
 					end
 					if ((lastbid ~= 0) and (lastbid < from) and (bid > from)) then
 						publish(sid, rid, lastlvl, lastbid, from, to)
+                                        	published = true
                                         end
+                                        lastrid = rid
                                         lastlvl = lvl
 					lastbid = bid
+					if DEBUG.query then
+						str = string.format("processed file /%s/%s/%s", rid, lvl, bid)
+						print(str)
+					end
 				end
 			end
+		end
+		if (published == false) then
+			publish(sid, lastrid, lastlvl, lastbid, from, to)
 		end
 		return true
 	end

@@ -77,8 +77,6 @@ var app = angular.module("flmUiApp");
 app.controller("ChartCtrl", function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
-    $scope.gauges = [];
-    $scope.message = "";
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
@@ -153,78 +151,44 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
-	// "real-time" data
         var data = new Array();
-	// counter data
-        var cntr = new Array();
-        var qfrom, qto, qtime, qcntr, qval, qunit, qfact = 36e3, i;
+        var qfrom, qto, qtime, qval, qfact = 3600, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         data = [];
-        cntr = [];
-        switch (tmpo.h.cfg.type) {
-          case "electricity":
-            qunit = "W";
-            qfact = 36e2 * 10;
-            break;
-
-          case "water":
-            qunit = "l";
-            //qfact = 
-            break;
-
-          case "gas":
-            qunit = "l";
-            //qfact = 
-            break;
-
-          case "temperature":
-            qunit = "°C";
-            //qfact =
-            break;
-
-          default:
-            qunit = "";
-            // qfact =
-            break;
-        }
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
         qtime = tmpo.h.head[0] * 1e3;
-        qcntr = tmpo.v[0];
         data.push([ qtime, tmpo.v[0] ]);
         // handle shorter sets of values
         if (tmpo.v.length < 6) {
             for (i = 1; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
-                qcntr += tmpo.v[i];
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round(tmpo.v[i] * qfact / tmpo.t[i]) / 10;
+                    // round to one decimal place
+                    qval = Math.round(tmpo.v[i] * qfact * 10 / tmpo.t[i]) / 10;
                     data.push([ qtime, qval ]);
-                    cntr.push([ qtime, qcntr ]);
                 }
             }
         } else {
-            qcntr += tmpo.v[1] + tmpo.v[2];
             // perform a rolling average on the data
             for (i = 3; i < tmpo.v.length - 2; i++) {
                 qtime += tmpo.t[i] * 1e3;
-                qcntr += tmpo.v[i];
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
+                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * qfact * 10 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
                     data.push([ qtime, qval ]);
-                    cntr.push([ qtime, qcntr ]);
                 }
             }
         }
-        data.shift(); // get rid of zero value at the serie's begin
+        data.shift();
+        // get rid of zero value at the serie's begin
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
-            return o.label == tmpo.h.cfg.function + " (" + qunit + ")";
+            return o.label == tmpo.h.cfg.function;
         });
         if (obj[0] == null) {
             obj = {};
-            obj.label = tmpo.h.cfg.function + " (" + qunit + ")";
+            obj.label = tmpo.h.cfg.function;
             obj.data = data;
             obj.color = color;
             color++;
@@ -236,31 +200,6 @@ app.controller("ChartCtrl", function($scope) {
                 obj[0].data.push(data[i]);
             }
             obj[0].data.sort(function(a, b) {
-                var x = a[0];
-                var y = b[0];
-                return y - x;
-            });
-        }
-        // add counter
-        var ctr = chart.filter(function(o) {
-            // to be altered with respect to "real" unit
-            return o.label == tmpo.h.cfg.function + " (" + qunit + "h)";
-        });
-        if (ctr[0] == null) {
-            ctr = {};
-            // to be altered with respect to "real" unit
-            ctr.label = tmpo.h.cfg.function + " (" + qunit + "h)";
-            ctr.data = cntr;
-            ctr.color = color;
-            color++;
-            chart.push(ctr);
-            // add graph selection option
-            $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + ctr.label + "' checked='checked'></input>" + ctr.label + "</label></small>" + "</div>");
-        } else {
-            for (i = 0; i < cntr.length; i++) {
-                ctr[0].data.push(cntr[i]);
-            }
-            ctr[0].data.sort(function(a, b) {
                 var x = a[0];
                 var y = b[0];
                 return y - x;
