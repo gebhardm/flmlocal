@@ -153,7 +153,8 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
-        var data = new Array(), qfrom, qto, qtime, qcntr, qval, qunit, i;
+        var data = new Array();
+        var qfrom, qto, qtime, qcntr, qval, qunit, qfact = 36e3, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         data = [];
@@ -161,29 +162,33 @@ app.controller("ChartCtrl", function($scope) {
         switch (tmpo.h.cfg.type) {
           case "electricity":
             qunit = "W";
+            qfact = 36e2 * 10;
             break;
 
           case "water":
             qunit = "l";
+            //qfact = 
             break;
 
           case "gas":
             qunit = "l";
+            //qfact = 
             break;
 
           case "temperature":
             qunit = "°C";
+            //qfact =
             break;
 
           default:
             qunit = "";
+            // qfact =
             break;
         }
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
         qtime = tmpo.h.head[0] * 1e3;
         qcntr = tmpo.v[0];
-        qtype = tmpo.h.cfg.type;
         data.push([ qtime, tmpo.v[0] ]);
         // handle shorter sets of values
         if (tmpo.v.length < 6) {
@@ -191,7 +196,7 @@ app.controller("ChartCtrl", function($scope) {
                 qtime += tmpo.t[i] * 1e3;
                 qcntr += tmpo.v[i];
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10;
+                    qval = Math.round(tmpo.v[i] * qfact / tmpo.t[i]) / 10;
                     data.push([ qtime, qval ]);
                     cntr.push([ qtime, qcntr ]);
                 }
@@ -205,11 +210,11 @@ app.controller("ChartCtrl", function($scope) {
                 if (qfrom <= qtime && qtime <= qto) {
                     qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
                     data.push([ qtime, qval ]);
-                    data.push([ qtime, qcntr ]);
+                    cntr.push([ qtime, qcntr ]);
                 }
             }
         }
-        data.shift();
+        data.shift(); // get rid of zero value at the serie's begin
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == tmpo.h.cfg.function + " (" + qunit + ")";
@@ -224,10 +229,35 @@ app.controller("ChartCtrl", function($scope) {
             // add graph selection option
             $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + obj.label + "' checked='checked'></input>" + obj.label + "</label></small>" + "</div>");
         } else {
-            for (var i = 0; i < data.length; i++) {
+            for (i = 0; i < data.length; i++) {
                 obj[0].data.push(data[i]);
             }
             obj[0].data.sort(function(a, b) {
+                var x = a[0];
+                var y = b[0];
+                return y - x;
+            });
+        }
+        // add counter
+        var ctr = chart.filter(function(o) {
+            // to be altered with respect to "real" unit
+            return o.label == tmpo.h.cfg.function + " (" + qunit + "h)";
+        });
+        if (ctr[0] == null) {
+            ctr = {};
+            // to be altered with respect to "real" unit
+            ctr.label = tmpo.h.cfg.function + " (" + qunit + "h)";
+            ctr.data = cntr;
+            ctr.color = color;
+            color++;
+            chart.push(ctr);
+            // add graph selection option
+            $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + ctr.label + "' checked='checked'></input>" + ctr.label + "</label></small>" + "</div>");
+        } else {
+            for (i = 0; i < cntr.length; i++) {
+                ctr[0].data.push(cntr[i]);
+            }
+            ctr[0].data.sort(function(a, b) {
                 var x = a[0];
                 var y = b[0];
                 return y - x;
