@@ -143,6 +143,7 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 						publish(sid, rid, lastlvl, lastbid, from, to)
                                         	published = true
                                         end
+                                        -- recognize overlaps in different compression stages
                                         lastrid = rid
                                         lastlvl = lvl
 					lastbid = bid
@@ -152,8 +153,9 @@ mqtt:set_callback(mosq.ON_MESSAGE, function(mid, topic, jpayload, qos, retain)
 					end
 				end
 			end
-		end
-		if (published == false) then
+	end
+		-- send last stored file in case there were no further readings, e.g. on solar
+		if ((published == false) and (lastbid < from)) then
 			publish(sid, lastrid, lastlvl, lastbid, from, to)
 		end
 		return true
