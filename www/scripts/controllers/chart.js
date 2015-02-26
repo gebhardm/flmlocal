@@ -152,9 +152,18 @@ app.controller("ChartCtrl", function($scope) {
     // plot the received data series
     function handle_sensor(topic, payload) {
         var data = new Array();
-        var qfrom, qto, qtime, qval, qfact = 3600, i;
+        var qfrom, qto, qtime, qval, qfact, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
+        switch (tmpo.h.cfg.type) {
+          case "electricity":
+            qfact = 3600;
+            break;
+
+          default:
+            qfact = 3600;
+            break;
+        }
         data = [];
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
@@ -180,8 +189,8 @@ app.controller("ChartCtrl", function($scope) {
                 }
             }
         }
-        data.shift();
         // get rid of zero value at the serie's begin
+        data.shift();
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == tmpo.h.cfg.function;
