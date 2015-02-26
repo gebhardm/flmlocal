@@ -77,8 +77,6 @@ var app = angular.module("flmUiApp");
 app.controller("ChartCtrl", function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
-    $scope.gauges = [];
-    $scope.message = "";
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
@@ -153,7 +151,8 @@ app.controller("ChartCtrl", function($scope) {
     }
     // plot the received data series
     function handle_sensor(topic, payload) {
-        var data = new Array(), qfrom, qto, qtime, qval, i;
+        var data = new Array();
+        var qfrom, qto, qtime, qval, qfact = 3600, i;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         data = [];
@@ -166,7 +165,8 @@ app.controller("ChartCtrl", function($scope) {
             for (i = 1; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round(tmpo.v[i] * 36e3 / tmpo.t[i]) / 10;
+                    // round to one decimal place
+                    qval = Math.round(tmpo.v[i] * qfact * 10 / tmpo.t[i]) / 10;
                     data.push([ qtime, qval ]);
                 }
             }
@@ -175,12 +175,13 @@ app.controller("ChartCtrl", function($scope) {
             for (i = 3; i < tmpo.v.length - 2; i++) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * 36e3 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
+                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * qfact * 10 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
                     data.push([ qtime, qval ]);
                 }
             }
         }
         data.shift();
+        // get rid of zero value at the serie's begin
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == tmpo.h.cfg.function;
@@ -195,7 +196,7 @@ app.controller("ChartCtrl", function($scope) {
             // add graph selection option
             $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + obj.label + "' checked='checked'></input>" + obj.label + "</label></small>" + "</div>");
         } else {
-            for (var i = 0; i < data.length; i++) {
+            for (i = 0; i < data.length; i++) {
                 obj[0].data.push(data[i]);
             }
             obj[0].data.sort(function(a, b) {
