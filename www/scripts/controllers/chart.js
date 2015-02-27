@@ -152,7 +152,8 @@ app.controller("ChartCtrl", function($scope) {
     // plot the received data series
     function handle_sensor(topic, payload) {
         var data = new Array();
-        var qfrom, qto, qtime, qval, qfact, i;
+        var qfrom, qto, qtime, qval, qfact;
+        var i, j, n = 5;
         var gunzip = new Zlib.Gunzip(payload);
         var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
         switch (tmpo.h.cfg.type) {
@@ -175,17 +176,19 @@ app.controller("ChartCtrl", function($scope) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
                     // round to one decimal place
-                    qval = Math.round(tmpo.v[i] * qfact * 10 / tmpo.t[i]) / 10;
-                    data.push([ qtime, qval ]);
+                    qval = qfact * tmpo.v[i] / tmpo.t[i];
+                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
                 }
             }
         } else {
-            // perform a rolling average on the data
-            for (i = 3; i < tmpo.v.length - 2; i++) {
+            for (i = n; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
+                qval = 0;
+                // perform a rolling average on the data
+                for (j = 0; j < n; j++) qval += qfact * tmpo.v[i - j] / tmpo.t[i - j];
+                qval /= n;
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * qfact * 10 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
-                    data.push([ qtime, qval ]);
+                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
                 }
             }
         }
