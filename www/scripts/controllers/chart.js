@@ -155,7 +155,14 @@ app.controller("ChartCtrl", function($scope) {
         var qfrom, qto, qtime, qval, qfact;
         var i, j, n = 5;
         var gunzip = new Zlib.Gunzip(payload);
-        var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
+        var decom = gunzip.decompress();
+        var str = "";
+        for (i = 0; i < decom.length; i++) {
+            str += String.fromCharCode(decom[i]);
+        }
+        var tmpo = JSON.parse(str);
+        decom = [];
+        str = "";
         switch (tmpo.h.cfg.type) {
           case "electricity":
             qfact = 3600;
@@ -183,11 +190,11 @@ app.controller("ChartCtrl", function($scope) {
         } else {
             for (i = n; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
-                qval = 0;
-                // perform a rolling average on the data
-                for (j = 0; j < n; j++) qval += qfact * tmpo.v[i - j] / tmpo.t[i - j];
-                qval /= n;
                 if (qfrom <= qtime && qtime <= qto) {
+                    qval = 0;
+                    // perform a rolling average on the data
+                    for (j = 0; j < n; j++) qval += qfact * tmpo.v[i - j] / tmpo.t[i - j];
+                    qval /= n;
                     data.push([ qtime, Math.round(qval * 10) / 10 ]);
                 }
             }
