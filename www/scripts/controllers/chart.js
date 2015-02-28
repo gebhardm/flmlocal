@@ -152,9 +152,26 @@ app.controller("ChartCtrl", function($scope) {
     // plot the received data series
     function handle_sensor(topic, payload) {
         var data = new Array();
-        var qfrom, qto, qtime, qval, qfact = 3600, i;
+        var qfrom, qto, qtime, qval, qfact;
+        var i, j, n = 5;
         var gunzip = new Zlib.Gunzip(payload);
-        var tmpo = JSON.parse(String.fromCharCode.apply(null, gunzip.decompress()));
+        var decom = gunzip.decompress();
+        var str = "";
+        for (i = 0; i < decom.length; i++) {
+            str += String.fromCharCode(decom[i]);
+        }
+        var tmpo = JSON.parse(str);
+        decom = [];
+        str = "";
+        switch (tmpo.h.cfg.type) {
+          case "electricity":
+            qfact = 3600;
+            break;
+
+          default:
+            qfact = 3600;
+            break;
+        }
         data = [];
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
@@ -166,22 +183,24 @@ app.controller("ChartCtrl", function($scope) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
                     // round to one decimal place
-                    qval = Math.round(tmpo.v[i] * qfact * 10 / tmpo.t[i]) / 10;
-                    data.push([ qtime, qval ]);
+                    qval = qfact * tmpo.v[i] / tmpo.t[i];
+                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
                 }
             }
         } else {
-            // perform a rolling average on the data
-            for (i = 3; i < tmpo.v.length - 2; i++) {
+            for (i = n; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
-                    qval = Math.round((tmpo.v[i - 2] + tmpo.v[i - 1] + tmpo.v[i] + tmpo.v[i + 1] + tmpo.v[i + 2]) * qfact * 10 / (tmpo.t[i - 2] + tmpo.t[i - 1] + tmpo.t[i] + tmpo.t[i + 1] + tmpo.t[i + 2])) / 10;
-                    data.push([ qtime, qval ]);
+                    qval = 0;
+                    // perform a rolling average on the data
+                    for (j = 0; j < n; j++) qval += qfact * tmpo.v[i - j] / tmpo.t[i - j];
+                    qval /= n;
+                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
                 }
             }
         }
-        data.shift();
         // get rid of zero value at the serie's begin
+        data.shift();
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == tmpo.h.cfg.function;
