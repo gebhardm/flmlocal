@@ -178,7 +178,7 @@ app.controller("ChartCtrl", function($scope) {
         qtime = tmpo.h.head[0] * 1e3;
         data.push([ qtime, tmpo.v[0] ]);
         // handle shorter sets of values
-        if (tmpo.v.length < 6) {
+        if (tmpo.v.length < n) {
             for (i = 1; i < tmpo.v.length; i++) {
                 qtime += tmpo.t[i] * 1e3;
                 if (qfrom <= qtime && qtime <= qto) {
