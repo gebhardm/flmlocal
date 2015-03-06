@@ -153,7 +153,7 @@ app.controller("ChartCtrl", function($scope) {
     function handle_sensor(topic, payload) {
         var data = new Array();
         var qfrom, qto, qtime, qval, qfact;
-        var i, j, n = 5;
+        var i, n = 60, deltax = 0, deltat = 0;
         var gunzip = new Zlib.Gunzip(payload);
         var decom = gunzip.decompress();
         var str = "";
@@ -176,31 +176,19 @@ app.controller("ChartCtrl", function($scope) {
         qfrom = topic[4] * 1e3;
         qto = topic[5] * 1e3;
         qtime = tmpo.h.head[0] * 1e3;
-        data.push([ qtime, tmpo.v[0] ]);
-        // handle shorter sets of values
-        if (tmpo.v.length < n) {
-            for (i = 1; i < tmpo.v.length; i++) {
-                qtime += tmpo.t[i] * 1e3;
-                if (qfrom <= qtime && qtime <= qto) {
-                    // round to one decimal place
-                    qval = qfact * tmpo.v[i] / tmpo.t[i];
-                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
+        for (i = 1; i < tmpo.v.length; i++) {
+            qtime += tmpo.t[i] * 1e3;
+            if (qfrom <= qtime && qtime <= qto) {
+                deltax += tmpo.v[i];
+                deltat += tmpo.t[i];
+                if (deltat >= n || i == tmpo.v.length - 1) {
+                    qval = qfact * deltax / deltat;
+                    deltax = 0;
+                    deltat = 0;
                 }
-            }
-        } else {
-            for (i = n; i < tmpo.v.length; i++) {
-                qtime += tmpo.t[i] * 1e3;
-                if (qfrom <= qtime && qtime <= qto) {
-                    qval = 0;
-                    // perform a rolling average on the data
-                    for (j = 0; j < n; j++) qval += qfact * tmpo.v[i - j] / tmpo.t[i - j];
-                    qval /= n;
-                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
-                }
+                data.push([ qtime, Math.round(qval * 10) / 10 ]);
             }
         }
-        // get rid of zero value at the serie's begin
-        data.shift();
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == tmpo.h.cfg.function;
