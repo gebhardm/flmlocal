@@ -104,7 +104,7 @@ app.controller("ChartCtrl", function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/#");
-        client.subscribe("/sensor/+/query/#");
+        client.subscribe("/sensor/+/query/+/+");
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {
@@ -144,26 +144,54 @@ app.controller("ChartCtrl", function($scope) {
                         sensors[cfg.id] = new Object();
                         sensors[cfg.id].id = cfg.id;
                         sensors[cfg.id].name = cfg.function;
+                        sensors[cfg.id].data = new Array();
                     } else sensors[cfg.id].name = cfg.function;
                 }
             }
         }
     }
-    // plot the received data series
+    // compute the received data series
     function handle_sensor(topic, payload) {
-        var data = new Array();
-        var qfrom, qto, qtime, qval, qfact;
-        var i, n = 60, deltax = 0, deltat = 0;
         var gunzip = new Zlib.Gunzip(payload);
         var decom = gunzip.decompress();
         var str = "";
+        var i, qfrom, qto, qtime, qval;
         for (i = 0; i < decom.length; i++) {
             str += String.fromCharCode(decom[i]);
         }
         var tmpo = JSON.parse(str);
-        decom = [];
-        str = "";
-        switch (tmpo.h.cfg.type) {
+        if (sensors[tmpo.h.cfg.id] == null) {
+            sensors[tmpo.h.cfg.id] = new Object();
+            sensors[tmpo.h.cfg.id].id = tmpo.h.cfg.id;
+            sensors[tmpo.h.cfg.id].name = tmpo.h.cfg.function;
+            sensors[tmpo.h.cfg.id].type = tmpo.h.cfg.type;
+            sensors[tmpo.h.cfg.id].data = new Array();
+        }
+        qfrom = topic[4];
+        qto = topic[5];
+        qtime = tmpo.h.head[0];
+        qval = tmpo.h.head[1];
+        for (i = 0; i < tmpo.v.length; i++) {
+            qtime += tmpo.t[i];
+            qval += tmpo.v[i];
+            if (qfrom <= qtime && qtime <= qto) {
+                sensors[tmpo.h.cfg.id].data.push([ qtime, qval ]);
+            }
+        }
+        // sort values from 'to' to 'from'
+        sensors[tmpo.h.cfg.id].data.sort(function(a, b) {
+            var x = a[0];
+            var y = b[0];
+            return x - y;
+        });
+        chart_sensor(tmpo.h.cfg.id);
+    }
+    // draw the sensor's chart
+    function chart_sensor(sensor) {
+        var data = new Array();
+        var qtime, qval, qfact, deltax = 0, deltat = 0;
+        var i, n = 60;
+        switch (sensors[sensor].type) {
           case "electricity":
             qfact = 3600;
             break;
@@ -173,29 +201,24 @@ app.controller("ChartCtrl", function($scope) {
             break;
         }
         data = [];
-        qfrom = topic[4] * 1e3;
-        qto = topic[5] * 1e3;
-        qtime = tmpo.h.head[0] * 1e3;
-        for (i = 1; i < tmpo.v.length; i++) {
-            qtime += tmpo.t[i] * 1e3;
-            if (qfrom <= qtime && qtime <= qto) {
-                deltax += tmpo.v[i];
-                deltat += tmpo.t[i];
-                if (deltat >= n || i == tmpo.v.length - 1) {
-                    qval = qfact * deltax / deltat;
-                    deltax = 0;
-                    deltat = 0;
-                }
+        for (i = 1; i < sensors[sensor].data.length; i++) {
+            qtime = sensors[sensor].data[i][0] * 1e3;
+            deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
+            deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
+            if (deltat >= n) {
+                qval = qfact * deltax / deltat;
+                deltax = 0;
+                deltat = 0;
                 data.push([ qtime, Math.round(qval * 10) / 10 ]);
             }
         }
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
-            return o.label == tmpo.h.cfg.function;
+            return o.label == sensors[sensor].name;
         });
         if (obj[0] == null) {
             obj = {};
-            obj.label = tmpo.h.cfg.function;
+            obj.label = sensors[sensor].name;
             obj.data = data;
             obj.color = color;
             color++;
@@ -203,14 +226,7 @@ app.controller("ChartCtrl", function($scope) {
             // add graph selection option
             $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + obj.label + "' checked='checked'></input>" + obj.label + "</label></small>" + "</div>");
         } else {
-            for (i = 0; i < data.length; i++) {
-                obj[0].data.push(data[i]);
-            }
-            obj[0].data.sort(function(a, b) {
-                var x = a[0];
-                var y = b[0];
-                return y - x;
-            });
+            obj[0].data = data;
         }
         // process the chart selection
         $("#choices").find("input").on("click", plotSelChart);
@@ -330,6 +346,8 @@ app.controller("ChartCtrl", function($scope) {
         for (var s in sensors) {
             msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
             client.send(msg);
+            // clear potentially existing chart data
+            sensors[s].data = [];
         }
         chart = [];
         color = 0;
