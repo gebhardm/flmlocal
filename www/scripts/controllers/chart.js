@@ -74,7 +74,7 @@ var fromDate, fromTime, toDate, toTime;
 // the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
 
-app.controller("ChartCtrl", function($scope) {
+app.controller("ChartCtrl", [ "$scope", function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.closeAlert = function(index) {
@@ -205,7 +205,7 @@ app.controller("ChartCtrl", function($scope) {
             qtime = sensors[sensor].data[i][0] * 1e3;
             deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
             deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
-            if (deltat >= n) {
+            if (deltat >= n || i == sensors[sensor].data.length - 1) {
                 qval = qfact * deltax / deltat;
                 deltax = 0;
                 deltat = 0;
@@ -353,4 +353,4 @@ app.controller("ChartCtrl", function($scope) {
         color = 0;
     }
     mqttConnect();
-});
+} ]);
