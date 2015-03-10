@@ -7,7 +7,7 @@ Use the linux/OSX command **scp** for this purpose; for windows use [WinSCP](htt
 
 You are prompted for the root's password, then all necessary files are transferred (recursively through option -r)
 
-By that you gain direct access to a local gauge and panel visualization directly from the Fluksometer's landing page navigation when calling
+By that you gain direct access to a local gauge, graph and panel visualization directly from the Fluksometer's landing page navigation when calling
 
     <flm ip address>
 
@@ -15,10 +15,12 @@ in your browser.
 
 <img src="FLMlocalGauge.png" width=500px>
 
-With a next version of the Fluksometer firmware there will be a dedicated topic on which the FLM's configuration is published; this adaptation is also available for an "old" fluksometer using the code provided in [/usr/sbin/fluksod.lua](/usr/sbin/fluksod.lua) - this enhances the flukso daemon by the corresponding functionality; use at own risk (after scp copy a reboot of the FLM is required).
+With a next version of the Fluksometer firmware there will be a dedicated topic on which the FLM's configuration is published; this adaptation is also available for an "old" Fluksometer using the code (delta) provided in [/usr/sbin/fluksod.lua](/usr/sbin/fluksod.lua) - this enhances the flukso daemon by the corresponding functionality; use at own risk. After scp copy a **restart of the flukso daemon** is required. This you can do by
+
+    /etc/init.d/flukso restart
 
 ##Show arbitrary sensors
-Even though the primary purpose of this implementation is to visualize Fluksometer readings, it is capable to handle also other information passed to the FLM's MQTT broker. So, if you have, for example, an [Arduino Ethernet](https://github.com/gebhardm/energyhacks/tree/master/AVRNetIOduino/AVRNetIO_MQTT_DS_DHT) publishing sensor data (for example on temperature or humidity), this can be visulaized as well, if you address the FLM MQTT broker. The visualizer (gauge, graph and panel) take all sensor information formatted as (payload in either format)
+Even though the primary purpose of this implementation is to visualize Fluksometer readings, it is capable to handle also other information passed to the FLM's MQTT broker. So, if you have, for example, an [Arduino Ethernet](https://github.com/gebhardm/energyhacks/tree/master/AVRNetIOduino/AVRNetIO_MQTT_DS_DHT) publishing sensor data (for example on temperature or humidity), this can be visualized as well, if you properly address the FLM MQTT broker. The visualizer (gauge, graph and panel) take all sensor information formatted as (payload in either format)
 
     topic: /sensor/<sensor id>/gauge
     payload: <value> 
@@ -36,27 +38,26 @@ Note that here the `<sensor id>` is taken as name as long as you are not publish
 <img src="FLMlocalPanel.png" width=500px>
  
 ## Querying TMPO data
-With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a proof-of-concept of a query daemon capable to retrieve locally stored tmpo files and visualize them; this may be used for data analysis without having to store data on an external database. The daemon works as follows:
+With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a proof-of-concept of a query daemon capable to retrieve locally stored tmpo files (available and active also from firmware v2.4.4 onwards) and visualize them; this may be used for data analysis without having to store data on an external database. The query daemon works as follows:
 
-Sending a MQTT message to the FLM's MQTT broker with following content
+Sending an MQTT message to the FLM's MQTT broker with following content
 
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used: POSIX timestamp/1000, thus on second base) one or more fitting tmpo files are retrieved and sent back to
+will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used, thus a POSIX timestamp on second base) one or more fitting tmpo files are retrieved and sent back, that is published, on
 
     topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
     
-The content of the queried data then is computed with a JS script in the browser and displayed as FluksoChart using Flot charts like in the FluksoGraph. For smoothing the graphs (it is shown the first derivative of the counter increase values with respect to time - actually a "simple difference calculation") a continuous average on minute based values is displayed. This is done as on raw data there are extreme "bumps" due to the discreteness and approximation of the original counter value set; if displayed directly, you will experience a kind of "pulse width modulation" which is rather inconvenient to the eye and stresses the Flot chart to an extreme. You may play with the value of *n* in [chart.js](https://github.com/gebhardm/flmlocal/blob/master/www/scripts/controllers/chart.js), *function chart_sensor(sensor)*).
+The content of the queried data then is decompressed and computed with a JS script in the browser and displayed as a FluksoChart using Flot charts like in the FluksoGraph. For smoothing the graphs (visualized is the first derivative of the counter increase values with respect to time - actually a "simple difference calculation" of the tmpo-stored counter values) a continuous average on minute based values is displayed. This is done as on raw data there are extreme "bumps" due to the discreteness and approximation of the original counter value set also on second base; if displayed directly, you will experience a kind of "pulse width modulation" which is rather inconvenient to the eye and stresses the Flot chart to an extreme. You may play with the value of *n* in [chart.js](https://github.com/gebhardm/flmlocal/blob/master/www/scripts/controllers/chart.js), *function chart_sensor(sensor)*.
 
 <img src="FLMlocalChart.png" width=500px>
 
-You may select by mouse details from a  smaller time interval; also you may switch on and off the different graphs in the chart using the checkboxes underneath.
+In the chart you may select by mouse details from a  smaller time interval (does sadly not seem to work on a tablet computer); also you may switch on and off the different graphs in the chart using the checkboxes underneath the diagram panel.
 
 ##Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
 
 The gauge uses [JustGage](http://justgage.com/), the graph is built using [Flot](http://www.flotcharts.org/) and the panel utilizes [jQuery Sparkline](http://omnipotent.net/jquery.sparkline/).<br/>
 Corresponding licenses are the [MIT license](http://opensource.org/licenses/mit-license.php) and the [New BSD license](http://opensource.org/licenses/BSD-3-Clause).
-
