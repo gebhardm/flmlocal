@@ -43,12 +43,12 @@ Sending a MQTT message to the FLM's MQTT broker with following content
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - tmpod.lua integration is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used) one or more fitting tmpo files are retrieved and sent back to
+will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used: POSIX timestamp/1000, thus on second base) one or more fitting tmpo files are retrieved and sent back to
 
     topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
     
-The content of the queried data then is computed with a Javascript script in the browser and displayed using Flot charts like in the FluksoGraph. For smoothing the graphs (it is shown the first derivative with respect to time - actually a "simple difference calculation") a rolling average of five values is displayed; yet there are "bumps" due to the discreteness and approximation of the value set.
+The content of the queried data then is computed with a JS script in the browser and displayed as FluksoChart using Flot charts like in the FluksoGraph. For smoothing the graphs (it is shown the first derivative of the counter increase values with respect to time - actually a "simple difference calculation") a continuous average on minute based values is displayed. This is done as on raw data there are extreme "bumps" due to the discreteness and approximation of the original counter value set; if displayed directly, you will experience a kind of "pulse width modulation" which is rather inconvenient to the eye and stresses the Flot chart to an extreme. You may play with the value of *n* in [chart.js](https://github.com/gebhardm/flmlocal/blob/master/www/scripts/controllers/chart.js), *function chart_sensor(sensor)*).
 
 <img src="FLMlocalChart.png" width=500px>
 
