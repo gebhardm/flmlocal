@@ -41,7 +41,9 @@ var series = new Array(), sensors = {};
 // the selected series to show
 var selSeries = new Array();
 
-var color = 0;
+var color;
+
+color = 0;
 
 var flotOptions = {
     series: {

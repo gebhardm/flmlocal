@@ -37,7 +37,9 @@ var port = 8083;
 var chart = new Array(), selChart = new Array();
 
 // chart colors
-var color = 0;
+var color;
+
+color = 0;
 
 // detected sensor configurations
 var sensors = {};
@@ -144,6 +146,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
                         sensors[cfg.id] = new Object();
                         sensors[cfg.id].id = cfg.id;
                         sensors[cfg.id].name = cfg.function;
+                        sensors[cfg.id].type = cfg.type;
                         sensors[cfg.id].data = new Array();
                     } else sensors[cfg.id].name = cfg.function;
                 }
@@ -189,51 +192,39 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
     // draw the sensor's chart
     function chart_sensor(sensor) {
         var data = new Array();
-        var qtime, qval, qfact, deltax, deltat;
+        var qtime, qval, deltax, deltat;
         var i, n = 60;
         // initialize data collection for charting
         data = [];
         deltax = 0;
         deltat = 0;
-        // compute the different sensor types
-        switch (sensors[sensor].type) {
-          case "electricity":
-            // calculate the wattage from the given Wh values in time interval
-            qfact = 3600;
-            for (i = 1; i < sensors[sensor].data.length; i++) {
-                qtime = sensors[sensor].data[i][0] * 1e3;
-                deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
-                deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
-                if (deltat >= n || i == sensors[sensor].data.length - 1) {
-                    qval = qfact * deltax / deltat;
-                    deltax = 0;
-                    deltat = 0;
-                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
-                }
-            }
-            break;
-            
-          case "water":
-          case "gas":
-            // sum up the volume flown during a time interval; no division here
-            for (i = 1; i < sensors[sensor].data.length; i++) {
-                qtime = sensors[sensor].data[i][0] * 1e3;
-                deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
-                deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
-                if (deltat >= n || i == sensors[sensor].data.length - 1) {
+        for (i = 1; i < sensors[sensor].data.length; i++) {
+            qtime = sensors[sensor].data[i][0] * 1e3;
+            deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
+            deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
+            if (deltat >= n || i == sensors[sensor].data.length - 1) {
+                // compute the different sensor types
+                switch (sensors[sensor].type) {
+                  case "electricity":
+                    // calculate the wattage from the given Wh values in time interval
+                    qval = 3600 * deltax / deltat;
+                    break;
+
+                  case "water":
+                  case "gas":
+                    // sum up the volume flown during a time interval; no division here
                     qval = deltax;
-                    deltax = 0;
-                    deltat = 0;
-                    data.push([ qtime, Math.round(qval * 10) / 10 ]);
+                    break;
+
+                  default:
+                    qval = deltax;
+                    break;
                 }
+                deltax = 0;
+                deltat = 0;
+                data.push([ qtime, Math.round(qval * 10) / 10 ]);
             }
-            break;
-            
-          default:
-            break;
         }
-        // check if data was created
-        if (data == []) return;
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
             return o.label == sensors[sensor].name;
