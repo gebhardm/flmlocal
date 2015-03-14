@@ -43,7 +43,7 @@ var color;
 var sensors = {};
 
 // chart display options
-var flotOptions = {
+var chartOptions = {
     series: {
         lines: {
             show: true,
@@ -260,7 +260,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             var height = width * 3 / 4;
             height = height > 600 ? 600 : height;
             $("#chart").width(width).height(height);
-            $("#chart").plot(selChart, flotOptions);
+            $("#chart").plot(selChart, chartOptions);
         }
         // and finally plot the graph
         $("#info").html("");
@@ -301,11 +301,11 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             var height = width * 3 / 4;
             height = height > 600 ? 600 : height;
             $("#chart").width(width).height(height);
-            $("#chart").plot(details, flotOptions);
+            $("#chart").plot(details, chartOptions);
             $("#info").html('<div align="center"><button class="btn btn-primary btn-sm" id="reset">Reset</button></div>');
             // redraw the queried data
             $("#reset").on("click", function() {
-                $("#chart").plot(selChart, flotOptions);
+                $("#chart").plot(selChart, chartOptions);
             });
         });
     }
