@@ -54,6 +54,8 @@ app.controller("GaugeCtrl", function($scope) {
             msg: error
         });
     }
+    // reset display
+    sensors = {}, numGauges = 0, row = [];
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -73,12 +75,14 @@ app.controller("GaugeCtrl", function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/#");
-        client.subscribe("/sensor/#");
+        client.subscribe("/sensor/+/gauge");
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {
         setTimeout(mqttConnect, reconnectTimeout);
-        if (responseObj.errorCode !== 0) console.log("onConnectionLost:" + responseObj.errorMessage);
+        if (responseObj.errorCode !== 0) {
+            console.log("onConnectionLost:" + responseObj.errorMessage);
+        }
     }
     // handle the received message
     function onMessageArrived(mqttMsg) {
@@ -206,9 +210,6 @@ app.controller("GaugeCtrl", function($scope) {
             }
             sensor.display.refresh(sensor.value);
             sensors[sensorId] = sensor;
-            break;
-
-          case "counter":
             break;
 
           default:

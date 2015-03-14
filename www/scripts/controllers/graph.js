@@ -79,7 +79,8 @@ app.controller("GraphCtrl", function($scope) {
             msg: error
         });
     }
-    // reset graph color scheme
+    // reset graph
+    series = [];
     color = 0;
     // the web socket connect function
     function mqttConnect() {
@@ -100,7 +101,7 @@ app.controller("GraphCtrl", function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/#");
-        client.subscribe("/sensor/+/+");
+        client.subscribe("/sensor/+/gauge");
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {
@@ -247,7 +248,7 @@ app.controller("GraphCtrl", function($scope) {
         var height = width * 3 / 4;
         height = height > 600 ? 600 : height;
         $("#graph").width(width).height(height);
-        $.plot("#graph", selSeries, flotOptions);
+        if ($("#graph").length) $.plot("#graph", selSeries, flotOptions);
         // and store the sensor configuration
         sensors[sensorId] = sensor;
     }

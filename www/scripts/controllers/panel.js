@@ -49,6 +49,9 @@ app.controller("PanelCtrl", function($scope) {
             msg: error
         });
     }
+    // reset display
+    sensors = {};
+    // connectivity
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
         client = new Paho.MQTT.Client(broker, port, "", wsID);
@@ -65,7 +68,8 @@ app.controller("PanelCtrl", function($scope) {
     }
     function onConnect() {
         client.subscribe("/device/#");
-        client.subscribe("/sensor/#");
+        client.subscribe("/sensor/+/gauge");
+        client.subscribe("/sensor/+/counter");
     }
     function onConnectionLost(responseObj) {
         setTimeout(mqttConnect, reconnectTimeout);
