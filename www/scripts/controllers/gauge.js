@@ -29,10 +29,9 @@ var client;
 var reconnectTimeout = 2e3;
 
 // the FLM's web socket port from mosquitto
-var broker = location.hostname, port = 8083;
+var broker = location.hostname;
 
-// get "different" websocketIDs
-var wsID = "FLM" + parseInt(Math.random() * 100, 10);
+var port = 8083;
 
 var sensors = {}, numGauges = 0;
 
@@ -57,6 +56,7 @@ app.controller("GaugeCtrl", function($scope) {
     }
     // the web socket connect function
     function mqttConnect() {
+        var wsID = "FLM" + parseInt(Math.random() * 100, 10);
         client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,

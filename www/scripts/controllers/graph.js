@@ -29,10 +29,9 @@ var client;
 var reconnectTimeout = 2e3;
 
 // the FLM's web socket port from mosquitto
-var broker = location.hostname, port = 8083;
+var broker = location.hostname;
 
-// get "different" websocketIDs
-var wsID = "FLM" + parseInt(Math.random() * 100, 10);
+var port = 8083;
 
 // prepare graph display
 // the received values
@@ -42,8 +41,6 @@ var series = new Array(), sensors = {};
 var selSeries = new Array();
 
 var color;
-
-color = 0;
 
 var flotOptions = {
     series: {
@@ -82,8 +79,11 @@ app.controller("GraphCtrl", function($scope) {
             msg: error
         });
     }
+    // reset graph color scheme
+    color = 0;
     // the web socket connect function
     function mqttConnect() {
+        var wsID = "FLM" + parseInt(Math.random() * 100, 10);
         client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,
@@ -100,7 +100,7 @@ app.controller("GraphCtrl", function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/#");
-        client.subscribe("/sensor/#");
+        client.subscribe("/sensor/+/+");
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {

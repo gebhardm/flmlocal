@@ -39,13 +39,11 @@ var chart = new Array(), selChart = new Array();
 // chart colors
 var color;
 
-color = 0;
-
 // detected sensor configurations
 var sensors = {};
 
 // chart display options
-var options = {
+var flotOptions = {
     series: {
         lines: {
             show: true,
@@ -88,8 +86,11 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             msg: error
         });
     }
+    // reset the graph color scheme
+    color = 0;
     // the web socket connect function
     function mqttConnect() {
+        var wsID = "FLM" + parseInt(Math.random() * 100, 10);
         client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,
@@ -258,7 +259,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             var height = width * 3 / 4;
             height = height > 600 ? 600 : height;
             $("#chart").width(width).height(height);
-            $("#chart").plot(selChart, options);
+            $("#chart").plot(selChart, flotOptions);
         }
         // and finally plot the graph
         $("#info").html("");
@@ -299,11 +300,11 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             var height = width * 3 / 4;
             height = height > 600 ? 600 : height;
             $("#chart").width(width).height(height);
-            $("#chart").plot(details, options);
+            $("#chart").plot(details, flotOptions);
             $("#info").html('<div align="center"><button class="btn btn-primary btn-sm" id="reset">Reset</button></div>');
             // redraw the queried data
             $("#reset").on("click", function() {
-                $("#chart").plot(selChart, options);
+                $("#chart").plot(selChart, flotOptions);
             });
         });
     }

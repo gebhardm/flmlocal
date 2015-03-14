@@ -27,9 +27,9 @@ var client;
 
 var reconnectTimeout = 2e3;
 
-var broker = location.hostname, port = 8083;
+var broker = location.hostname;
 
-var wsID = "FLM" + parseInt(Math.random() * 100, 10);
+var port = 8083;
 
 var sensors = {};
 
@@ -50,6 +50,7 @@ app.controller("PanelCtrl", function($scope) {
         });
     }
     function mqttConnect() {
+        var wsID = "FLM" + parseInt(Math.random() * 100, 10);
         client = new Paho.MQTT.Client(broker, port, "", wsID);
         var options = {
             timeout: 3,
