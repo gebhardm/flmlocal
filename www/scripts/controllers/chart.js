@@ -127,7 +127,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
             break;
 
           case "sensor":
-            payload = mqttMsg.payloadBytes;
+            if (topic[3] == "query") payload = mqttMsg.payloadBytes; else payload = mqttMsg.payloadString;
             handle_sensor(topic, payload);
             break;
 
@@ -156,6 +156,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
     }
     // compute the received data series
     function handle_sensor(topic, payload) {
+        if (topic[3] != "query") return;
         var gunzip = new Zlib.Gunzip(payload);
         var decom = gunzip.decompress();
         var str = "";
