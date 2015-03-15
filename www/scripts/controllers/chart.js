@@ -356,7 +356,7 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
         var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3 + offset;
         var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3 + offset;
         $("#chart").html("");
-        $("#info").html("<p class='text-center'>Loading</p>");
+        $("#info").html("<div align='center'>Query request sent...</div>");
         var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
         for (var s in sensors) {
             msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
