@@ -68,9 +68,6 @@ var chartOptions = {
     }
 };
 
-// chart display options
-var fromDate, fromTime, toDate, toTime;
-
 // the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
 
@@ -335,12 +332,26 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
     });
     // prepare and emit the query request
     $("#submit").on("click", function() {
-        fromDate = $("#fromDate").val();
-        fromTime = $("#fromTime").val();
-        toDate = $("#toDate").val();
-        toTime = $("#toTime").val();
+        var fromDate = $("#fromDate").val();
+        var fromTime = $("#fromTime").val();
+        var toDate = $("#toDate").val();
+        var toTime = $("#toTime").val();
+        var offset = new Date().getTimezoneOffset() * 60;
+        var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3 + offset;
+        var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3 + offset;
+        var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
+        for (var s in sensors) {
+            msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
+            client.send(msg);
+            // clear potentially existing chart data
+            sensors[s].data = [];
+        }
+        // clear the chart section and show notification
+        chart = [];
+        color = 0;
+        $("#chart").html("");
         $("#choices").html("");
-        emit();
+        $("#info").html("<div align='center'>Query request sent...</div>");
     });
     // allow tooltip on datapoints
     $("<div id='tooltip'></div>").css({
@@ -350,22 +361,5 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
         padding: "2px",
         opacity: .9
     }).appendTo("body");
-    // emit the query request to the server part
-    function emit() {
-        var offset = new Date().getTimezoneOffset() * 60;
-        var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3 + offset;
-        var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3 + offset;
-        $("#chart").html("");
-        $("#info").html("<div align='center'>Query request sent...</div>");
-        var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
-        for (var s in sensors) {
-            msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
-            client.send(msg);
-            // clear potentially existing chart data
-            sensors[s].data = [];
-        }
-        chart = [];
-        color = 0;
-    }
     mqttConnect();
 } ]);
