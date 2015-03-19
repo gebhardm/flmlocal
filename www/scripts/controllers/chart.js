@@ -339,6 +339,10 @@ app.controller("ChartCtrl", [ "$scope", function($scope) {
         var offset = new Date().getTimezoneOffset() * 60;
         var from = Date.parse(fromDate + "T" + fromTime + "Z") / 1e3 + offset;
         var to = Date.parse(toDate + "T" + toTime + "Z") / 1e3 + offset;
+        if (isNaN(from) || isNaN(to)) {
+            $("#info").html("<div align='center'>Date or Time invalid...</div>");
+            return;
+        }
         var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
         for (var s in sensors) {
             msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
