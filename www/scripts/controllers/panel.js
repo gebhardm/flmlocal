@@ -23,11 +23,7 @@ THE SOFTWARE.
 */
 "use strict";
 
-var app = angular.module("flmUiApp");
-
-app.controller("PanelCtrl", PanelCtrl($scope));
-
-function PanelCtrl($scope) {
+var PanelCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.sensors = [];
@@ -175,4 +171,8 @@ function PanelCtrl($scope) {
         sensors[sensorId] = sensor;
     }
     mqttConnect();
-}
+};
+
+PanelCtrl.$inject = [ "$scope" ];
+
+angular.module("flmUiApp").controller("PanelCtrl", PanelCtrl($scope));

@@ -23,12 +23,7 @@ THE SOFTWARE.
 */
 "use strict";
 
-// the part of the AngularJS application that handles the gauges
-var app = angular.module("flmUiApp");
-
-app.controller("GraphCtrl", GraphCtrl($scope));
-
-function GraphCtrl($scope) {
+var GraphCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.closeAlert = function(index) {
@@ -272,5 +267,9 @@ function GraphCtrl($scope) {
         });
     });
     mqttConnect();
-}
+};
 
+// the part of the AngularJS application that handles the graph
+GaugeCtrl.$inject = [ "$scope" ];
+
+angular.module("flmUiApp").controller("GraphCtrl", GraphCtrl($scope));
