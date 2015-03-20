@@ -23,65 +23,50 @@ THE SOFTWARE.
 */
 "use strict";
 
-// link to the web server's IP address for MQTT socket connection
-var client;
-
-var reconnectTimeout = 2e3;
-
-// the FLM's web socket port from mosquitto
-var broker = location.hostname;
-
-var port = 8083;
-
-// prepare graph display
-// the received values
-var series = new Array(), sensors = {};
-
-// the selected series to show
-var selSeries = new Array();
-
-var color;
-
-var flotOptions = {
-    series: {
-        lines: {
-            show: true,
-            steps: true
-        },
-        points: {
-            show: false
-        }
-    },
-    grid: {
-        hoverable: true
-    },
-    xaxis: {
-        mode: "time",
-        timezone: "browser"
-    },
-    yaxis: {
-        min: 0
-    }
-};
-
 // the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
 
-app.controller("GraphCtrl", function($scope) {
+app.controller("GraphCtrl", GraphCtrl($scope));
+
+function GraphCtrl($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    function pushError(error) {
-        $scope.alerts.push({
-            type: "error",
-            msg: error
-        });
-    }
-    // reset graph
-    series = [];
-    color = 0;
+    // link to the web server's IP address for MQTT socket connection
+    var client;
+    var reconnectTimeout = 2e3;
+    // the FLM's web socket port from mosquitto
+    var broker = location.hostname;
+    var port = 8083;
+    // prepare graph display
+    // the received values
+    var series = new Array(), sensors = {};
+    // the selected series to show
+    var selSeries = new Array();
+    var color = 0;
+    var flotOptions = {
+        series: {
+            lines: {
+                show: true,
+                steps: true
+            },
+            points: {
+                show: false
+            }
+        },
+        grid: {
+            hoverable: true
+        },
+        xaxis: {
+            mode: "time",
+            timezone: "browser"
+        },
+        yaxis: {
+            min: 0
+        }
+    };
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -287,4 +272,5 @@ app.controller("GraphCtrl", function($scope) {
         });
     });
     mqttConnect();
-});
+}
+

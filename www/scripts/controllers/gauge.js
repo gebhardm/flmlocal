@@ -23,24 +23,12 @@ THE SOFTWARE.
 */
 "use strict";
 
-// link to the web server's IP address for MQTT socket connection
-var client;
-
-var reconnectTimeout = 2e3;
-
-// the FLM's web socket port from mosquitto
-var broker = location.hostname;
-
-var port = 8083;
-
-var sensors = {}, numGauges = 0;
-
-var row = [];
-
 // the part of the AngularJS application that handles the gauges
 var app = angular.module("flmUiApp");
 
-app.controller("GaugeCtrl", function($scope) {
+app.controller("GaugeCtrl", GaugeCtrl($scope));
+
+function GaugeCtrl($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.gauges = [];
@@ -48,14 +36,14 @@ app.controller("GaugeCtrl", function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    function pushError(error) {
-        $scope.alerts.push({
-            type: "error",
-            msg: error
-        });
-    }
-    // reset display
-    sensors = {}, numGauges = 0, row = [];
+    // link to the web server's IP address for MQTT socket connection
+    var client;
+    var reconnectTimeout = 2e3;
+    // the FLM's web socket port from mosquitto
+    var broker = location.hostname;
+    var port = 8083;
+    var sensors = {}, numGauges = 0;
+    var row = [];
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -217,4 +205,5 @@ app.controller("GaugeCtrl", function($scope) {
         }
     }
     mqttConnect();
-});
+}
+
