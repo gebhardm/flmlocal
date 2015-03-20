@@ -205,4 +205,4 @@ var GaugeCtrl = function($scope) {
 // the part of the AngularJS application that handles the gauges
 GaugeCtrl.$inject = [ "$scope" ];
 
-angular.module("flmUiApp").controller("GaugeCtrl", GaugeCtrl($scope));
+angular.module("flmUiApp").controller("GaugeCtrl", GaugeCtrl);

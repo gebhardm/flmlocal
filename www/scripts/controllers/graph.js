@@ -272,4 +272,4 @@ var GraphCtrl = function($scope) {
 // the part of the AngularJS application that handles the graph
 GaugeCtrl.$inject = [ "$scope" ];
 
-angular.module("flmUiApp").controller("GraphCtrl", GraphCtrl($scope));
+angular.module("flmUiApp").controller("GraphCtrl", GraphCtrl);

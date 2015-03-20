@@ -173,6 +173,7 @@ var PanelCtrl = function($scope) {
     mqttConnect();
 };
 
+// the part of the AngularJS application that handles the panel
 PanelCtrl.$inject = [ "$scope" ];
 
-angular.module("flmUiApp").controller("PanelCtrl", PanelCtrl($scope));
+angular.module("flmUiApp").controller("PanelCtrl", PanelCtrl);
