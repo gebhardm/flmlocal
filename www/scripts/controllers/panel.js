@@ -23,10 +23,30 @@ THE SOFTWARE.
 */
 "use strict";
 
+angular.module("flmUiApp").directive("sparkline", function() {
+    return {
+        restrict: "E",
+        scope: {
+            data: "@"
+        },
+        replace: true,
+        link: function postLink(scope, elem, attrs) {
+            scope.$watch("data", function(newData) {
+                var data = newData;
+                $(elem).sparkline(data, {
+                    type: "line",
+                    width: "100%",
+                    height: "50px"
+                });
+            });
+        }
+    };
+});
+
 var PanelCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
-    $scope.sensors = [];
+    $scope.sensors = {};
     $scope.message = "";
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
@@ -62,7 +82,7 @@ var PanelCtrl = function($scope) {
     }
     function onMessageArrived(mqttMsg) {
         var topic = mqttMsg.destinationName.split("/");
-        var payload = mqttMsg.payloadString;
+        if (topic[3] !== "query") var payload = mqttMsg.payloadString; else return;
         switch (topic[1]) {
           case "device":
             handle_device(topic, payload);
@@ -71,6 +91,7 @@ var PanelCtrl = function($scope) {
           case "sensor":
             handle_sensor(topic, payload);
             $scope.$apply(function() {
+                $scope.sensors = sensors;
                 $scope.message = mqttMsg.destinationName + ", " + payload;
             });
             break;
@@ -142,8 +163,6 @@ var PanelCtrl = function($scope) {
             // create and fill an array of last n gauge values
             if (sensor.series == null) {
                 sensor.series = new Array();
-                var tablerow = "<tr>" + '<td width="30%" style="vertical-align:middle;">' + '<h4 id="sensor' + sensor.id + '"></h4>' + '<small id="time' + sensor.id + '"><small>' + "</td>" + '<td style="vertical-align:middle;">' + '<span id="sparkline' + sensor.id + '"></span>' + "</td>" + '<td width="30%" style="vertical-align:middle;">' + '<h4 id="value' + sensor.id + '"></h4>' + '<small id="counter' + sensor.id + '"></small>' + "</td>" + "</tr>";
-                $("#panel").append(tablerow);
             }
             if (sensor.series.length == 60) sensor.series.shift();
             sensor.series.push(sensor.gaugevalue);
@@ -158,16 +177,6 @@ var PanelCtrl = function($scope) {
           default:
             break;
         }
-        $("#sensor" + sensor.id).html(sensor.name);
-        $("#time" + sensor.id).html(sensor.gaugetimestamp);
-        $("#value" + sensor.id).html(sensor.gaugevalue + " " + sensor.gaugeunit);
-        $("#sparkline" + sensor.id).sparkline(sensor.series, {
-            type: "line",
-            width: "200",
-            height: "50",
-            tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
-        });
-        if (!(sensor.countervalue === undefined)) $("#counter" + sensor.id).html("Total " + sensor.countervalue + " " + sensor.counterunit);
         sensors[sensorId] = sensor;
     }
     mqttConnect();

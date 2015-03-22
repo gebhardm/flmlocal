@@ -8,6 +8,19 @@
 <div class="accordion-group">
     <div class="accordion-inner">
         <table id="panel" class="table table-striped">
+            <tr ng-repeat="sensor in sensors">
+                <td width="30%" style="vertical-align:middle;">
+                    <h4>{{sensor.name}}</h4>
+                    <small>{{sensor.gaugetimestamp}}</small>
+                </td>
+                <td stype="vertical-align:middle;">
+                    <sparkline data="{{sensor.series}}"></sparkline>
+                </td>
+                <td width="30%" style="vertical-align:middle;">
+                    <h4>{{sensor.gaugevalue}} {{sensor.gaugeunit}}</h4>
+                    <small>Total {{sensor.countervalue}} {{sensor.counterunit}}</small>
+                </td>
+            </tr>
         </table>
     </div>
 </div>
