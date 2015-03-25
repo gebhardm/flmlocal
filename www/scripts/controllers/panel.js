@@ -25,18 +25,13 @@ THE SOFTWARE.
 
 angular.module("flmUiApp").directive("sparkline", function() {
     return {
-        restrict: "E",
-        scope: {
-            data: "@"
-        },
-        replace: true,
+        restrict: "C",
         link: function postLink(scope, elem, attrs) {
-            scope.$watch("data", function(newData) {
-                var data = newData;
-                $(elem).sparkline(data, {
+            scope.$watch(attrs.data, function(newData) {
+                $(elem).sparkline(newData, {
                     type: "line",
                     width: "100%",
-                    height: "50px"
+                    height: 50
                 });
             });
         }
