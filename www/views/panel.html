@@ -13,8 +13,8 @@
                     <h4>{{sensor.name}}</h4>
                     <small>{{sensor.gaugetimestamp}}</small>
                 </td>
-                <td stype="vertical-align:middle;">
-                    <sparkline data="{{sensor.series}}"></sparkline>
+                <td style="vertical-align:middle;">
+                    <div class="sparkline" data="sensor.series"></div>
                 </td>
                 <td width="30%" style="vertical-align:middle;">
                     <h4>{{sensor.gaugevalue}} {{sensor.gaugeunit}}</h4>
