@@ -23,34 +23,34 @@ THE SOFTWARE.
 */
 "use strict";
 
-angular.module("flmUiApp").directive("sparkline", function() {
-    return {
-        restrict: "C",
-        link: function postLink(scope, elem, attrs) {
-            scope.$watch(attrs.data, function(newData) {
-                $(elem).sparkline(newData, {
-                    type: "line",
-                    width: "100%",
-                    height: 50
-                });
-            });
-        }
-    };
-});
+var client;
 
-var PanelCtrl = function($scope) {
+var reconnectTimeout = 2e3;
+
+var broker = location.hostname;
+
+var port = 8083;
+
+var sensors = {};
+
+var app = angular.module("flmUiApp");
+
+app.controller("PanelCtrl", function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
-    $scope.sensors = {};
+    $scope.sensors = [];
     $scope.message = "";
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    var client;
-    var reconnectTimeout = 2e3;
-    var broker = location.hostname;
-    var port = 8083;
-    var sensors = {};
+    function pushError(error) {
+        $scope.alerts.push({
+            type: "error",
+            msg: error
+        });
+    }
+    // reset display
+    sensors = {};
     // connectivity
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -77,7 +77,7 @@ var PanelCtrl = function($scope) {
     }
     function onMessageArrived(mqttMsg) {
         var topic = mqttMsg.destinationName.split("/");
-        if (topic[3] !== "query") var payload = mqttMsg.payloadString; else return;
+        var payload = mqttMsg.payloadString;
         switch (topic[1]) {
           case "device":
             handle_device(topic, payload);
@@ -86,7 +86,6 @@ var PanelCtrl = function($scope) {
           case "sensor":
             handle_sensor(topic, payload);
             $scope.$apply(function() {
-                $scope.sensors = sensors;
                 $scope.message = mqttMsg.destinationName + ", " + payload;
             });
             break;
@@ -158,6 +157,8 @@ var PanelCtrl = function($scope) {
             // create and fill an array of last n gauge values
             if (sensor.series == null) {
                 sensor.series = new Array();
+                var tablerow = "<tr>" + '<td width="30%" style="vertical-align:middle;">' + '<h4 id="sensor' + sensor.id + '"></h4>' + '<small id="time' + sensor.id + '"><small>' + "</td>" + '<td style="vertical-align:middle;">' + '<span id="sparkline' + sensor.id + '"></span>' + "</td>" + '<td width="30%" style="vertical-align:middle;">' + '<h4 id="value' + sensor.id + '"></h4>' + '<small id="counter' + sensor.id + '"></small>' + "</td>" + "</tr>";
+                $("#panel").append(tablerow);
             }
             if (sensor.series.length == 60) sensor.series.shift();
             sensor.series.push(sensor.gaugevalue);
@@ -172,12 +173,17 @@ var PanelCtrl = function($scope) {
           default:
             break;
         }
+        $("#sensor" + sensor.id).html(sensor.name);
+        $("#time" + sensor.id).html(sensor.gaugetimestamp);
+        $("#value" + sensor.id).html(sensor.gaugevalue + " " + sensor.gaugeunit);
+        $("#sparkline" + sensor.id).sparkline(sensor.series, {
+            type: "line",
+            width: "200",
+            height: "50",
+            tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
+        });
+        if (!(sensor.countervalue === undefined)) $("#counter" + sensor.id).html("Total " + sensor.countervalue + " " + sensor.counterunit);
         sensors[sensorId] = sensor;
     }
     mqttConnect();
-};
-
-// the part of the AngularJS application that handles the panel
-PanelCtrl.$inject = [ "$scope" ];
-
-angular.module("flmUiApp").controller("PanelCtrl", PanelCtrl);
+});
