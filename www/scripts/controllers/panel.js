@@ -23,19 +23,7 @@ THE SOFTWARE.
 */
 "use strict";
 
-var client;
-
-var reconnectTimeout = 2e3;
-
-var broker = location.hostname;
-
-var port = 8083;
-
-var sensors = {};
-
-var app = angular.module("flmUiApp");
-
-app.controller("PanelCtrl", function($scope) {
+var PanelCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.sensors = [];
@@ -43,14 +31,12 @@ app.controller("PanelCtrl", function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    function pushError(error) {
-        $scope.alerts.push({
-            type: "error",
-            msg: error
-        });
-    }
-    // reset display
-    sensors = {};
+    // initialize panel
+    var client;
+    var reconnectTimeout = 2e3;
+    var broker = location.hostname;
+    var port = 8083;
+    var sensors = {};
     // connectivity
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -186,4 +172,9 @@ app.controller("PanelCtrl", function($scope) {
         sensors[sensorId] = sensor;
     }
     mqttConnect();
-});
+};
+
+// the part of the AngularJS application that handles the panel
+PanelCtrl.$inject = [ "$scope" ];
+
+angular.module("flmUiApp").controller("PanelCtrl", PanelCtrl);
