@@ -36,7 +36,7 @@ var PanelCtrl = function($scope) {
     var reconnectTimeout = 2e3;
     var broker = location.hostname;
     var port = 8083;
-    var sensors = {};
+    var sensors = [];
     // connectivity
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -89,25 +89,33 @@ var PanelCtrl = function($scope) {
                 var cfg = config[obj];
                 if (cfg.enable == "1") {
                     var sensorId = cfg.id;
-                    if (sensors[sensorId] == null) {
-                        sensors[sensorId] = new Object();
-                        sensors[sensorId].id = cfg.id;
-                        sensors[sensorId].name = cfg.function;
-                    } else sensors[sensorId].name = cfg.function;
+                    var sensor = sensors.filter(function(s) {
+                        return s.id == sensorId;
+                    });
+                    if (sensor[0] == null) {
+                        sensor = {};
+                        sensor.id = cfg.id;
+                        sensor.name = cfg.function;
+                        sensors.push(sensor);
+                    } else sensor[0].name = cfg.function;
                 }
             }
         }
     }
     function handle_sensor(topic, payload) {
-        var sensor = {};
         var msgType = topic[3];
         var sensorId = topic[2];
         var value = JSON.parse(payload);
-        if (sensors[sensorId] == null) {
-            sensors[sensorId] = new Object();
+        var sensor = {};
+        var sIndex = sensors.filter(function(s) {
+            return s.id == sensorId;
+        });
+        if (sIndex[0] == null) {
             sensor.id = sensorId;
             sensor.name = sensorId;
-        } else sensor = sensors[sensorId];
+            sensors.push(sensor);
+            sensor = sensors[sensors.length - 1];
+        } else sensor = sIndex[0];
         switch (msgType) {
           case "gauge":
             if (value.length == null) {
@@ -165,7 +173,6 @@ var PanelCtrl = function($scope) {
             tooltipFormat: '<span class="text-info bg-info">{{x}}:{{y}}</span>'
         });
         if (sensor.countervalue === undefined) sensor.countervalue = "";
-        sensors[sensorId] = sensor;
     }
     mqttConnect();
 };
