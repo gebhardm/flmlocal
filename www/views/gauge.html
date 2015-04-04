@@ -5,20 +5,22 @@
 <div class="page-header">
     <h1>FluksoGauges</h1>
 </div>
-<div class="accordion-group">
-    <div class="accordion-inner">
-        <table id="gauge" class="table table-striped">
-            <tr ng-repeat="row in gauges">
-                <td ng-repeat="col in row" width=50%>
-                    <div id="{{col.id}}"></div>
-                </td>
-            </tr>
-        </table>
+<div class="container-fluid">
+    <div class="accordion-group">
+        <div class="accordion-inner">
+            <table id="gauge" class="table table-striped">
+                <tr ng-repeat="row in gauges">
+                    <td ng-repeat="col in row" width=50%>
+                        <div id="{{col.id}}"></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-</div>
-<div class="accordion-group">
-    <div class="accordion-inner">
-        <small><b>Latest MQTT message: </b>{{message}}</small>
+    <div class="accordion-group">
+        <div class="accordion-inner">
+            <small><b>Latest MQTT message: </b>{{message}}</small>
+        </div>
     </div>
 </div>
 <div align="center">
