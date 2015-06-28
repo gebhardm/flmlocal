@@ -15,7 +15,7 @@ in your browser.
 
 <img src="FLMlocalGauge.png" width=500px>
 
-With a next version of the Fluksometer firmware there will be a dedicated topic on which the FLM's configuration is published; this adaptation is also available for an "old" Fluksometer using the code (delta) provided in [/usr/sbin/fluksod.lua](/usr/sbin/fluksod.lua) - this enhances the flukso daemon by the corresponding functionality; use at own risk. After scp copy a **restart of the flukso daemon** is required. This you can do by
+With a next version of the Fluksometer firmware there will be a dedicated topic on which the FLM's configuration is published; this adaptation is also available for an "old" Fluksometer using the code (delta) provided in [/usr/sbin/fluksod.lua](/usr/sbin/fluksod.lua) - this enhances the flukso daemon by the corresponding functionality (copy the altered flukso-daemon version into your FLM's /usr/sbin folder); use at own risk. After scp copy a **restart of the flukso daemon** is required. This you can do by
 
     /etc/init.d/flukso restart
 
@@ -45,7 +45,7 @@ Sending an MQTT message to the FLM's MQTT broker with following content
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (run it on the FLM with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used, thus a POSIX timestamp on second base) one or more fitting tmpo files are retrieved and sent back, that is published, on
+will be computed by the query daemon (copy it to the /usr/sbin folder of your FLM using **scp** as depicted above and run it with **lua /usr/sbin/queryd.lua &** without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the /sensor-topics is used, thus a POSIX timestamp on second base) one or more fitting tmpo files are retrieved and sent back, that is published, on
 
     topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
