@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <link rel="stylesheet" href="styles/bootstrap.css">
+    <link rel="stylesheet" href="styles/ui-grid.min.css">
     <link rel="stylesheet" href="styles/main.css">
   </head>
   <body ng-app="flmUiApp">
@@ -29,12 +30,14 @@
             <li><a href="#/status"><status>status</status></a></li>
             <li><a href="#/wifi"><wifi>wifi</wifi></a></li>
             <li><a href="#/sensor"><sensor>sensor</sensor></a></li>
+            <li><a href="#/kube"><kube>kube</kube></a></li>
             <li><a href="#/services"><services>services</services></a></li>
             <li><a href="#/syslog"><syslog>syslog</syslog></a></li>
+            <li><a href="#/mqtt"><mqtt>mqtt</mqtt></a></li>
             <li><a href="#/chart"><chart>chart</chart></a></li>
             <li><a href="#/gauge"><gauge>gauge</gauge></a></li>
             <li><a href="#/graph"><graph>graph</graph></a></li>
-            <li><a href="#/panel"><panel>panel</panel></a></li>
+            <li><a href="#/panel"><panel>panel</panel></a></li>			
           </ul>
         </div>
       </div>
@@ -43,9 +46,10 @@
     <div class="container" ng-view></div>
 
     <script src="components/angular/angular.min.js"></script>
+    <script src="components/angular-route/angular-route.min.js"></script>
     <script src="components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-
-    <script type="text/javascript" src="components/mqttws/mqttws31.min.js"></script>
+    <script src="components/angular-ui-grid/ui-grid.min.js"></script>
+    <script src="components/mqttws/mqttws31-min.js"></script>
     <script type="text/javascript" src="components/raphael/raphael.min.js"></script>
     <script type="text/javascript" src="components/raphael/justgage.min.js"></script>
     <script type="text/javascript" src="components/jquery/jquery.min.js"></script>
@@ -54,15 +58,16 @@
     <script type="text/javascript" src="components/jquery/jquery.flot.time.js"></script>
     <script type="text/javascript" src="components/jquery/jquery.flot.selection.js"></script>
     <script type="text/javascript" src="components/gzip/gunzip.min.js"></script>
-
     <!-- build:js scripts/scripts.js -->
     <script src="scripts/app.js"></script>
     <script src="scripts/controllers/main.js"></script>
     <script src="scripts/controllers/sensor.js"></script>
+    <script src="scripts/controllers/kube.js"></script>
     <script src="scripts/controllers/wifi.js"></script>
     <script src="scripts/controllers/status.js"></script>
     <script src="scripts/controllers/services.js"></script>
     <script src="scripts/controllers/syslog.js"></script>
+    <script src="scripts/controllers/mqtt.js"></script>
     <script src="scripts/controllers/chart.js"></script>
     <script src="scripts/controllers/gauge.js"></script>
     <script src="scripts/controllers/graph.js"></script>

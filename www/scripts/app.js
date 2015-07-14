@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Bart Van Der Meerssche <bart@flukso.net>
+ * Copyright (c) 2015 Bart Van Der Meerssche <bart@flukso.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,14 @@
 
 'use strict';
 
-angular.module('flmUiApp', ['ui.bootstrap'])
+angular.module('flmUiApp', [
+    'ngRoute',
+    'ui.bootstrap',
+    'ui.grid',
+    'ui.grid.edit',
+    'ui.grid.rowEdit',
+    'ui.grid.selection'
+  ])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
@@ -29,6 +36,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         templateUrl: 'views/sensor.html',
         controller: 'SensorCtrl',
         tagName: 'sensor'
+      })
+      .when('/kube', {
+        templateUrl: 'views/kube.html',
+        controller: 'KubeCtrl',
+        tagName: 'kube'
       })
       .when('/wifi', {
         templateUrl: 'views/wifi.html',
@@ -50,6 +62,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         controller: 'SyslogCtrl',
         tagName: 'syslog'
       })
+      .when('/mqtt', {
+        templateUrl: 'views/mqtt.html',
+        controller: 'MqttCtrl',
+        tagName: 'mqtt'
+      })
       .when('/chart', {
         templateUrl: 'views/chart.html',
         controller: 'ChartCtrl',
@@ -69,7 +86,7 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         templateUrl: 'views/panel.html',
         controller: 'PanelCtrl',
         tagName: 'panel'
-      })
+      })	  
       .otherwise({
         redirectTo: '/'
       });
