@@ -1,6 +1,6 @@
 #FLM local visualizations
 This is a native implementation of the [Justgage](http:/justgage.com) gauges, the [Flot](http://www.flotcharts.org/) charts and a plain panel to be used in the [Fluksometer's](http://flukso.net) AngularJS based user interface. It sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/).<br/>
-To utilize this implementation, copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4.<br>
+To utilize this implementation, copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4. - the current implementation reflects the state as of firmware version 2.4.6.<br>
 Use the linux/OSX command **scp** for this purpose; for windows use [WinSCP](http://winscp.net).
 
     scp -r * root@<FLM ip address>:/www/
@@ -15,9 +15,7 @@ in your browser.
 
 <img src="FLMlocalGauge.png" width=500px>
 
-With a next version of the Fluksometer firmware there will be a dedicated topic on which the FLM's configuration is published; this adaptation is also available for an "old" Fluksometer using the code (delta) provided in [/usr/sbin/fluksod.lua](/usr/sbin/fluksod.lua) - this enhances the flukso daemon by the corresponding functionality (copy the altered flukso-daemon version into your FLM's /usr/sbin folder); use at own risk. After scp copy a **restart of the flukso daemon** is required. This you can do by
-
-    /etc/init.d/flukso restart
+From Fluksometer firmware version 2.4.6 onwards there is a dedicated topic on which the FLM's configuration is published; on topic **/device/<device id\>/config** all parameters are available that indicate specific sensor settings. For more information, please refer to the next section. 
 
 ##Show arbitrary sensors
 Even though the primary purpose of this implementation is to visualize Fluksometer readings, it is capable to handle also other information passed to the FLM's MQTT broker. So, if you have, for example, an [Arduino Ethernet](https://github.com/gebhardm/energyhacks/tree/master/AVRNetIOduino/AVRNetIO_MQTT_DS_DHT) publishing sensor data (for example on temperature or humidity), this can be visualized as well, if you properly address the FLM MQTT broker. The visualizer (gauge, graph and panel) take all sensor information formatted as (payload in either format)
