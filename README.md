@@ -38,7 +38,7 @@ Note that here the `<sensor id>` is taken as name as long as you are not publish
 ## Querying TMPO data
 With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a proof-of-concept of a query daemon capable to retrieve locally stored TMPO time series files (available and active also from firmware v2.4.4 onwards) and visualize them; this may be used for data analysis without having to store data on an external database. 
 
-To install this feature, copy the query.lua file to the `/usr/sbin` folder of your FLM using **scp** as depicted above and run it with `lua /usr/sbin/queryd.lua &` without having to install a real daemon for now - a pull request for [tmpod.lua integration](https://github.com/flukso/flm02/pull/6) has been sent, but is not merged. Of course, you may install this also as a daemon by adding a symbolic link `ln -s /usr/sbin/queryd /usr/sbin/luad` and starting the query daemon by `/usr/sbin/queryd -u flukso`; startup integration to be added.
+To install this feature, copy the query.lua file to the `/usr/sbin` folder of your FLM using **scp** as depicted above and run it with `lua /usr/sbin/queryd.lua &` without having to install a real daemon for now - a pull request for [tmpod.lua integration](https://github.com/flukso/flm02/pull/6) has been sent, but is not merged. Of course, you may install this also as a daemon by adding a symbolic link `ln -s /usr/sbin/luad /usr/sbin/queryd` and starting the query daemon by `/usr/sbin/queryd -u flukso`; startup integration to be added.
 
 The query daemon works as follows:
 
