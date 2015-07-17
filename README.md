@@ -36,14 +36,18 @@ Note that here the `<sensor id>` is taken as name as long as you are not publish
 <img src="FLMlocalPanel.png" width=500px>
  
 ## Querying TMPO data
-With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a proof-of-concept of a query daemon capable to retrieve locally stored TMPO time series files (available and active also from firmware v2.4.4 onwards) and visualize them; this may be used for data analysis without having to store data on an external database. The query daemon works as follows:
+With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a proof-of-concept of a query daemon capable to retrieve locally stored TMPO time series files (available and active also from firmware v2.4.4 onwards) and visualize them; this may be used for data analysis without having to store data on an external database. 
+
+To install this feature, copy the query.lua file to the `/usr/sbin` folder of your FLM using **scp** as depicted above and run it with `lua /usr/sbin/queryd.lua &` without having to install a real daemon for now - a pull request for [tmpod.lua integration](https://github.com/flukso/flm02/pull/6) has been sent, but is not merged. Of course, you may install this also as a daemon by adding a symbolic link `ln -s /usr/sbin/queryd /usr/sbin/luad` and starting the query daemon by `/usr/sbin/queryd -u flukso`; startup integration to be added.
+
+The query daemon works as follows:
 
 Sending an MQTT message to the FLM's MQTT broker with following content
 
     topic: /query/<sid>/tmpo
     payload: [<fromtimestamp>, <totimestamp>]
     
-will be computed by the query daemon (copy it to the `/usr/sbin` folder of your FLM using **scp** as depicted above and run it with `lua /usr/sbin/queryd.lua &` without having to install a real daemon for now - [tmpod.lua integration](https://github.com/gebhardm/flm02/tree/tmpoquery) is available, but not merged). Corresponding to the sent query time interval (the same timestamp format as provided by the `/sensor`-topics is used, thus a POSIX timestamp on second base) one or more fitting TMPO files are retrieved and sent back, that is published, on
+will be computed by the query daemon. Corresponding to the sent query time interval (the same timestamp format as provided by the `/sensor`-topics is used, thus a POSIX timestamp on second base) one or more fitting TMPO files are retrieved and sent back, that is published, on
 
     topic: /sensor/<sid>/query/<fromtimestamp>/<totimestamp>
     payload: <gzipped tmpo file>
