@@ -72,6 +72,11 @@ angular.module('flmUiApp', [
         controller: 'ChartCtrl',
         tagName: 'chart'
       })
+      .when('/consumption', {
+        templateUrl: 'views/consumption.html',
+        controller: 'ConsumptionCtrl',
+        tagName: 'consumption'
+      })
       .when('/gauge', {
         templateUrl: 'views/gauge.html',
         controller: 'GaugeCtrl',

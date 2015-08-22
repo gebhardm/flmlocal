@@ -1,0 +1,30 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div class="page-header">
+    <h1>FluksoConsumption</h1>
+</div>
+<div class="container-fluid">
+    <div class="accordion-group">
+        <div class="accordion-inner">
+           <table class="table">
+               <tr>
+                 <td><div id="grid"></div></td>
+                 <td><div id="production"></div></td>
+               </tr>
+               <tr>           
+                 <td colspan="2"><div id="consumption"></div></td>
+               </tr>
+           </table>
+        </div>
+    </div>
+    <div class="accordion-group">
+        <div class="accordion-inner" id="choices"></div>
+    </div>
+</div>
+<div align="center">
+    <small>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Consumption Display</a> &copy; 2015</p>
+    </small>
+</div>
