@@ -26,8 +26,6 @@ THE SOFTWARE.
 var ConsumptionCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
-    $scope.gauges = [];
-    $scope.message = "";
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
@@ -37,8 +35,8 @@ var ConsumptionCtrl = function($scope) {
     // the FLM's web socket port from mosquitto
     var broker = location.hostname;
     var port = 8083;
-    var sensors = {}, numGauges = 0;
-    var row = [];
+    var sensors = {};
+    var limit = 3600;
     // initialize the consumption gauges
     var grid = new JustGage({
         id: "grid",
@@ -46,7 +44,7 @@ var ConsumptionCtrl = function($scope) {
         title: "Grid",
         label: "W",
         min: 0,
-        max: 3600,
+        max: limit,
         decimals: 0
     });
     var production = new JustGage({
@@ -55,7 +53,7 @@ var ConsumptionCtrl = function($scope) {
         title: "Production",
         label: "W",
         min: 0,
-        max: 3600,
+        max: limit,
         decimals: 0
     });
     var consumption = new JustGage({
@@ -64,7 +62,7 @@ var ConsumptionCtrl = function($scope) {
         title: "Consumption",
         label: "W",
         min: 0,
-        max: 3600,
+        max: limit,
         decimals: 0
     });
     // the web socket connect function
@@ -151,38 +149,29 @@ var ConsumptionCtrl = function($scope) {
         switch (msgType) {
           case "gauge":
             // handle the payload to obtain gauge values
-            if (value.length == null) {
-                sensor.value = value;
-                sensor.unit = "";
-            } else {
-                switch (value.length) {
-                  case 1:
-                    sensor.value = value[0];
-                    sensor.unit = "";
-                    break;
+            switch (value.length) {
+              case 1:
+                break;
 
-                  case 2:
-                    sensor.value = value[0];
-                    sensor.unit = value[1];
-                    break;
+              case 2:
+                break;
 
-                  case 3:
-                    var date = new Date(value[0] * 1e3);
-                    // the timestamp
-                    var now = new Date().getTime();
-                    if (now / 1e3 - value[0] > 60) value[1] = 0;
-                    // if too old, set to 0
-                    sensor.value = value[1];
-                    sensor.unit = value[2];
-                    break;
+              case 3:
+                if (value[2] !== "W") break;
+                var date = new Date(value[0] * 1e3);
+                // the timestamp
+                var now = new Date().getTime();
+                if (now / 1e3 - value[0] > 60) value[1] = 0;
+                // if too old, set to 0
+                sensor.value = value[1];
+                sensor.unit = value[2];
+                break;
 
-                  default:
-                    break;
-                }
+              default:
+                break;
             }
             // now build the gauge display
-            if (sensor.type == null) {
-                numGauges++;
+            if (sensor.type == null && sensor.unit === "W") {
                 $("#choices").append("<div class='form-inline'>" + "<label for='type " + sensor.name + "' class='control-label span2'>" + sensor.name + "</label>" + "<select id='type " + sensor.name + "'>" + "<option>Consumption</option>" + "<option>Production</option>" + "</select>" + "</div>");
             }
             // compute the selected sensor type
@@ -194,30 +183,45 @@ var ConsumptionCtrl = function($scope) {
           default:
             break;
         }
-        handle_display();
+        handle_display(sensor);
     }
-    function handle_display() {
-        var gridValue = 0;
+    // handle the visualization refresh
+    function handle_display(sensor) {
         var productionValue = 0;
         var consumptionValue = 0;
         for (var s in sensors) {
-            switch (sensors[s].type) {
-              case "Production":
-                productionValue += sensors[s].value;
-                break;
+            if (sensors[s].unit === "W") {
+                switch (sensors[s].type) {
+                  case "Production":
+                    productionValue += sensors[s].value;
+                    break;
 
-              case "Consumption":
-                consumptionValue += sensors[s].value;
-                break;
+                  case "Consumption":
+                    consumptionValue += sensors[s].value;
+                    break;
 
-              default:
-                break;
+                  default:
+                    break;
+                }
             }
         }
-        gridValue = consumptionValue - productionValue;
-        grid.refresh(gridValue);
-        production.refresh(productionValue);
-        consumption.refresh(consumptionValue);
+        var gridValue = consumptionValue - productionValue;
+        // update the gauges
+        if (gridValue > limit) {
+            grid.refresh(gridValue, gridValue);
+        } else {
+            grid.refresh(gridValue);
+        }
+        if (productionValue > limit) {
+            production.refresh(productionValue, productionValue);
+        } else {
+            production.refresh(productionValue);
+        }
+        if (consumptionValue > limit) {
+            consumption.refresh(consumptionValue, consumptionValue);
+        } else {
+            consumption.refresh(consumptionValue);
+        }
     }
     mqttConnect();
 };
