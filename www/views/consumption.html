@@ -1,23 +1,31 @@
+<style type="text/css">
+      .watt {position:absolute; width:150px; text-align:center; color: rgb(91,155,213); font-family:arial; font-size:32px; font-weight:bold;}
+      #image {position:relative; left:0;top:0; width:600px}
+      #grid { top:120px; left:30px;}
+      #supply {top:20px; left:240px;}
+      #selfuse {top:210px; left:365px;}
+      #production {top:120px; left:450px;}
+      #consumption {top:390px; left:240px;}
+      #obtained {top:210px; left:115px;}
+      #status {position:absolute; top:272px; left:225px; width:180px; height:180px; border-radius:30px; opacity:0.2;}
+</style>
+
 <div>
     <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
 
-<div class="page-header">
-    <h1>FluksoConsumption</h1>
-</div>
 <div class="container-fluid">
     <div class="accordion-group">
-        <div class="accordion-inner">
-           <table class="table">
-               <tr>
-                 <td><div id="grid"></div></td>
-                 <td><div id="production"></div></td>
-               </tr>
-               <tr>           
-                 <td colspan="2"><div id="consumption"></div></td>
-               </tr>
-           </table>
-        </div>
+        <div class="accordion-inner" id="image">
+    <img src="img/EnergyConsumption.png" alt="Consumption Graphics" />
+    <div id="grid" class="watt"></div>
+    <div id="supply" class="watt"></div>
+    <div id="selfuse" class="watt"></div>
+    <div id="production" class="watt"></div>
+    <div id="consumption" class="watt"></div>
+    <div id="obtained" class="watt"></div>
+    <div id="status"></div>
+    </div>
     </div>
     <div class="accordion-group">
         <div class="accordion-inner" id="choices"></div>

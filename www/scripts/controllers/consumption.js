@@ -36,35 +36,6 @@ var ConsumptionCtrl = function($scope) {
     var broker = location.hostname;
     var port = 8083;
     var sensors = {};
-    var limit = 3600;
-    // initialize the consumption gauges
-    var grid = new JustGage({
-        id: "grid",
-        value: 0,
-        title: "Grid",
-        label: "W",
-        min: 0,
-        max: limit,
-        decimals: 0
-    });
-    var production = new JustGage({
-        id: "production",
-        value: 0,
-        title: "Production",
-        label: "W",
-        min: 0,
-        max: limit,
-        decimals: 0
-    });
-    var consumption = new JustGage({
-        id: "consumption",
-        value: 0,
-        title: "Consumption",
-        label: "W",
-        min: 0,
-        max: limit,
-        decimals: 0
-    });
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -206,22 +177,16 @@ var ConsumptionCtrl = function($scope) {
             }
         }
         var gridValue = consumptionValue - productionValue;
-        // update the gauges
-        if (gridValue > limit) {
-            grid.refresh(gridValue, gridValue);
-        } else {
-            grid.refresh(gridValue);
-        }
-        if (productionValue > limit) {
-            production.refresh(productionValue, productionValue);
-        } else {
-            production.refresh(productionValue);
-        }
-        if (consumptionValue > limit) {
-            consumption.refresh(consumptionValue, consumptionValue);
-        } else {
-            consumption.refresh(consumptionValue);
-        }
+        var selfuseValue = productionValue > consumptionValue ? consumptionValue : productionValue;
+        var supplyValue = productionValue > consumptionValue ? productionValue - consumptionValue : 0;
+        var obtainedValue = consumptionValue - productionValue > 0 ? consumptionValue - productionValue : 0;
+        $("#grid").html(gridValue + "W");
+        $("#supply").html(supplyValue + "W");
+        $("#production").html(productionValue + "W");
+        $("#selfuse").html(selfuseValue + "W");
+        $("#consumption").html(consumptionValue + "W");
+        $("#obtained").html(obtainedValue + "W");
+        if (productionValue >= consumptionValue) $("#status").css("background-color", "green"); else $("#status").css("background-color", "red");
     }
     mqttConnect();
 };
