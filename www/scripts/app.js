@@ -96,6 +96,62 @@ angular.module('flmUiApp', [
         redirectTo: '/'
       });
   })
+  .controller('MenuCtrl', function($scope) {
+    $scope.menus = [
+  {
+    title: "configuration", 
+    action: "#", 
+    menus: [
+      {
+        title: "status",
+        action: "#/status"
+      },
+      {
+        title: "kube",
+        action: "#/kube"
+      },
+      {
+        title: "services",
+        action: "#/services"
+      },
+      {
+        title: "syslog",
+        action: "#/syslog"
+      },
+      {
+        title: "mqtt",
+        action: "#/mqtt"
+      }
+    ]
+  },
+  {
+    title: "visualization", 
+    action: "#", 
+    menus: [
+      {
+        title: "chart",
+        action: "#/chart"
+      },
+      {
+        title: "consumption",
+        action: "#/consumption"
+      },
+      {
+        title: "gauge",
+        action: "#/gauge"
+      },
+      {
+        title: "graph",
+        action: "#/graph"
+      },
+      {
+        title: "panel",
+        action: "#/panel"
+      }
+    ]
+  }
+]
+  })
   .run(function($rootScope, $route) {
     $rootScope.$on("$routeChangeSuccess", function(ngEvent, currRoute, prevRoute) {
       if (prevRoute && prevRoute.tagName) {
