@@ -59,10 +59,11 @@ The content of the queried data then is decompressed and computed with a JS scri
 In the chart you may select by mouse details from a smaller time interval (does sadly not seem to work on a tablet computer); also you may switch on and off the different graphs in the chart using the checkboxes underneath the diagram panel.
 
 ## Show Simple Consumption
-As a quick hack, following a discussion in the FluksoForum, I made a simple consumption view, showing what is produced (e.g. by a PV installation), what is totally consumed and what is as difference taken (or supplied to) the power grid.
-Sensors can be labelled as producing or consuming input.
+As a further visualization variant, following a [discussion in the FluksoForum](https://www.flukso.net/content/simple-graphically-styled-display-summarising-everything-including-net-consumption), I made a simple consumption view, showing what is produced (e.g. by a PV installation), what is totally consumed and what is as difference taken (or supplied to) the power grid. The specialty of this visualization is, that sensors can be labelled as producing or consuming input.<br> Also the corrsponding menu selection has been change to dropdown menus to prevent overcrowding of the navigation bar.
 This is in experimental stage yet, but shows opportunities...
+
 <img src="FLMlocalConsumption.png" width=500px>
+
 ##Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
 
