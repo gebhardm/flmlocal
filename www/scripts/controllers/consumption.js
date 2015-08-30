@@ -176,10 +176,42 @@ var ConsumptionCtrl = function($scope) {
                 }
             }
         }
+        // compute the consumption values
         var gridValue = consumptionValue - productionValue;
         var selfuseValue = productionValue > consumptionValue ? consumptionValue : productionValue;
         var supplyValue = productionValue > consumptionValue ? productionValue - consumptionValue : 0;
         var obtainedValue = consumptionValue - productionValue > 0 ? consumptionValue - productionValue : 0;
+        // compute the scaling
+        $("#image").css("position", "relative");
+        var scale = $("#image").width() / 1226;
+        // format the output
+        $(".watt").css("position", "absolute");
+        $(".watt").css("width", 307 * scale + "px");
+        $(".watt").css("text-align", "center");
+        $(".watt").css("color", "rgb(91,155,213)");
+        $(".watt").css("font-family", "arial");
+        $(".watt").css("font-size", 64 * scale + "px");
+        $(".watt").css("font-weight", "bold");
+        $("#grid").css("top", 245 * scale + "px");
+        $("#grid").css("left", 60 * scale + "px");
+        $("#supply").css("top", 40 * scale + "px");
+        $("#supply").css("left", 500 * scale + "px");
+        $("#selfuse").css("top", 420 * scale + "px");
+        $("#selfuse").css("left", 740 * scale + "px");
+        $("#production").css("top", 245 * scale + "px");
+        $("#production").css("left", 910 * scale + "px");
+        $("#consumption").css("top", 795 * scale + "px");
+        $("#consumption").css("left", 480 * scale + "px");
+        $("#obtained").css("top", 420 * scale + "px");
+        $("#obtained").css("left", 220 * scale + "px");
+        $("#status").css("position", "absolute");
+        $("#status").css("top", 555 * scale + "px");
+        $("#status").css("left", 455 * scale + "px");
+        $("#status").css("width", 360 * scale + "px");
+        $("#status").css("height", 360 * scale + "px");
+        $("#status").css("border-radius", 60 * scale + "px");
+        $("#status").css("opacity", "0.2");
+        // write the values to the display
         $("#grid").html(gridValue + "W");
         $("#supply").html(supplyValue + "W");
         $("#production").html(productionValue + "W");
