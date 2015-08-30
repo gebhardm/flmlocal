@@ -29,6 +29,7 @@ var ConsumptionCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
+    $scope.cfgCollapsed = false;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -218,7 +219,11 @@ var ConsumptionCtrl = function($scope) {
         $("#selfuse").html(selfuseValue + "W");
         $("#consumption").html(consumptionValue + "W");
         $("#obtained").html(obtainedValue + "W");
-        if (productionValue >= consumptionValue) $("#status").css("background-color", "green"); else $("#status").css("background-color", "red");
+        if (productionValue >= consumptionValue) {
+            $("#status").css("background-color", "green");
+        } else {
+            $("#status").css("background-color", "red");
+        }
     }
     mqttConnect();
 };

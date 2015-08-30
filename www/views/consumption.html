@@ -5,22 +5,23 @@
 <div class="container-fluid">
     <div class="accordion-group">
         <div class="accordion-inner" id="image">
-    <img src="img/EnergyConsumption.png" alt="Consumption Graphics" />
-    <div id="grid" class="watt"></div>
-    <div id="supply" class="watt"></div>
-    <div id="selfuse" class="watt"></div>
-    <div id="production" class="watt"></div>
-    <div id="consumption" class="watt"></div>
-    <div id="obtained" class="watt"></div>
-    <div id="status"></div>
+            <img src="img/EnergyConsumption.png" alt="Consumption Graphics" />
+            <div id="grid" class="watt"></div>
+            <div id="supply" class="watt"></div>
+            <div id="selfuse" class="watt"></div>
+            <div id="production" class="watt"></div>
+            <div id="consumption" class="watt"></div>
+            <div id="obtained" class="watt"></div>
+            <div id="status"></div>
+        </div>
     </div>
-    </div>
-    <div class="accordion-group">
+    <div class="accordion-group" collapse="cfgCollapsed">
         <div class="accordion-inner" id="choices"></div>
     </div>
 </div>
 <div align="center">
     <small>
-        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Consumption Display</a> &copy; 2015</p>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Consumption Display</a> &copy; 2015 - 
+        <a href ng-click="cfgCollapsed = !cfgCollapsed">Toggle Configuration</a></p>
     </small>
 </div>
