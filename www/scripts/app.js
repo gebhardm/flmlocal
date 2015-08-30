@@ -107,6 +107,14 @@ angular.module('flmUiApp', [
         action: "#/status"
       },
       {
+        title: "wifi",
+        action: "#/wifi"
+      },
+      {
+        title: "sensor",
+        action: "#/sensor"
+      },
+      {
         title: "kube",
         action: "#/kube"
       },
