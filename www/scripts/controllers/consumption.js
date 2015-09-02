@@ -182,6 +182,20 @@ var ConsumptionCtrl = function($scope) {
         var selfuseValue = productionValue > consumptionValue ? consumptionValue : productionValue;
         var supplyValue = productionValue > consumptionValue ? productionValue - consumptionValue : 0;
         var obtainedValue = consumptionValue - productionValue > 0 ? consumptionValue - productionValue : 0;
+        // write the values to the display
+        $("#grid").html(gridValue + "W");
+        $("#supply").html(supplyValue + "W");
+        $("#production").html(productionValue + "W");
+        $("#selfuse").html(selfuseValue + "W");
+        $("#consumption").html(consumptionValue + "W");
+        $("#obtained").html(obtainedValue + "W");
+        if (productionValue >= consumptionValue) {
+            $("#status").css("background-color", "green");
+        } else {
+            $("#status").css("background-color", "red");
+        }
+    }
+    function init_display() {
         // compute the scaling
         $("#image").css("position", "relative");
         var scale = $("#image").width() / 1226;
@@ -212,19 +226,8 @@ var ConsumptionCtrl = function($scope) {
         $("#status").css("height", 360 * scale + "px");
         $("#status").css("border-radius", 60 * scale + "px");
         $("#status").css("opacity", "0.2");
-        // write the values to the display
-        $("#grid").html(gridValue + "W");
-        $("#supply").html(supplyValue + "W");
-        $("#production").html(productionValue + "W");
-        $("#selfuse").html(selfuseValue + "W");
-        $("#consumption").html(consumptionValue + "W");
-        $("#obtained").html(obtainedValue + "W");
-        if (productionValue >= consumptionValue) {
-            $("#status").css("background-color", "green");
-        } else {
-            $("#status").css("background-color", "red");
-        }
     }
+    init_display();
     mqttConnect();
 };
 
