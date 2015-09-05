@@ -29,6 +29,7 @@ var GraphCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
+    $scope.selCollapsed = false;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;

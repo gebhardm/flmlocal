@@ -28,6 +28,7 @@ var PanelCtrl = function($scope) {
     $scope.alerts = [];
     $scope.sensors = [];
     $scope.message = "";
+    $scope.msgCollapsed = false;
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };

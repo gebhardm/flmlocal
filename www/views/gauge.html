@@ -17,7 +17,7 @@
             </table>
         </div>
     </div>
-    <div class="accordion-group">
+    <div class="accordion-group" collapse="msgCollapsed">
         <div class="accordion-inner">
             <small><b>Latest MQTT message: </b>{{message}}</small>
         </div>
@@ -25,6 +25,7 @@
 </div>
 <div align="center">
     <small>
-        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Gauge Display</a> &copy; 2014</p>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Gauge Display</a> &copy; 2014 -
+        <a href ng-click="msgCollapsed = !msgCollapsed">Toggle Message View</a></p>
     </small>
 </div>

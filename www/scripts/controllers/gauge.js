@@ -28,6 +28,7 @@ var GaugeCtrl = function($scope) {
     $scope.alerts = [];
     $scope.gauges = [];
     $scope.message = "";
+    $scope.msgCollapsed = false;
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };

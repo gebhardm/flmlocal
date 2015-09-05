@@ -55,7 +55,7 @@ var ConsumptionCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/#");
+        client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
     // event handler on connection lost
@@ -126,6 +126,9 @@ var ConsumptionCtrl = function($scope) {
                 break;
 
               case 2:
+                if (value[1] !== "W") break;
+                sensor.value = value[0];
+                sensor.unit = value[1];
                 break;
 
               case 3:
