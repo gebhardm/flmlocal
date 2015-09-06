@@ -6,25 +6,29 @@ It contains a native implementation of [Justgage](http:/justgage.com) gauges, [F
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4.<br>
-The current implementation reflects the state as of firmware version 2.4.6 (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten - factory reset remains unchanged, of course).<br>
+To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4.x.<br>
+Alternatively [download the ZIP](https://github.com/gebhardm/flmlocal/archive/master.zip) and unpack it, but be aware that you then cannot get updates with an easy `pull`. So, take some time to learn about [Git](http://git-scm.com/) and install it on your computer.
 
-Use the linux/OSX command **scp** for this purpose; for windows use [WinSCP](http://winscp.net).
+The current implementation reflects the state as of the Fluksometer firmware version 2.4.6 (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten - factory reset remains unchanged, of course).<br>
+
+Use the linux/OSX command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a 
 
     scp -r * root@<FLM ip address>:/www/
 
-You are prompted for the root's password (default is `root`), then all necessary files are transferred (recursively through option -r)
+You are prompted for the root's password (default is `root`), then all necessary files are transferred (recursively through option -r) to your Fluksometer.
 
 By that you gain direct access to the different visualization alternatives directly from the Fluksometer's landing page navigation when calling
 
-    <flm ip address>
+    http://<flm ip address>
 
-in your browser. Be aware that due to overcrowding by the larger number of navigation options I condensed the selection into dropdown menus.
+in your browser (you may find the FLM also through Bonjour). Be aware that due to overcrowding by the larger number of navigation options I condensed the selection of the differen configuration and visualization pages into dropdown menus.
+
+All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything further (especially no Java).
 
 <img src="FLMlocalGauge.png" width=500px>
 
 ## Recognizing device configuration
-From Fluksometer firmware version 2.4.6 onwards there is a dedicated topic on which the FLM's configuration is published; on topic `/device/<device id>/config` all parameters are available that indicate specific sensor settings. This is used to show the actual sensor names instead of just their IDs. For more information, please refer to the next section.
+From Fluksometer firmware version 2.4.6 onwards there is a dedicated MQTT topic on which the FLM's configuration is published; on topic `/device/<device id>/config/sensor` all parameters are available that indicate specific sensor settings. This is used to show the actual sensor names instead of just their IDs. For more information, please refer to the next section.
 
 ## Show arbitrary sensors
 Even though the primary purpose of this implementation is to visualize Fluksometer readings, it is capable to handle also other information passed to the FLM's MQTT broker (try it with [mosquitto](http://mosquitto.org/)).<br>
@@ -80,5 +84,5 @@ As a further visualization variant, following a [discussion in the FluksoForum](
 ## Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
 
-The gauge uses [JustGage](http://justgage.com/), the graph is built using [Flot](http://www.flotcharts.org/) and the panel utilizes [jQuery Sparkline](http://omnipotent.net/jquery.sparkline/).<br/>
+The gauge uses [JustGage](http://justgage.com/), the graphs are built using [Flot](http://www.flotcharts.org/) and the panel utilizes [jQuery Sparkline](http://omnipotent.net/jquery.sparkline/); the consumption view uses my humble own graphical representation. All utilizes [jQuery](https://jquery.com/).<br/>
 Corresponding licenses are the [MIT license](http://opensource.org/licenses/mit-license.php) and the [New BSD license](http://opensource.org/licenses/BSD-3-Clause).
