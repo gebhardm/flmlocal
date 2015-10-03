@@ -29,7 +29,13 @@ var ConsumptionCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    $scope.cfgCollapsed = false;
+    // check for locally stored parameters
+    var infoPanel = localStorage.getItem("cfgVis");
+    if (infoPanel === "true") {
+        $scope.cfgCollapsed = true;
+    } else {
+        $scope.cfgCollapsed = false;
+    }
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -204,6 +210,10 @@ var ConsumptionCtrl = function($scope) {
             $("#status").css("background-color", "green");
         } else {
             $("#status").css("background-color", "red");
+        }
+        if (infoPanel !== $scope.cfgCollapsed) {
+            infoPanel = $scope.cfgCollapsed;
+            localStorage.setItem("cfgVis", infoPanel);
         }
     }
     function init_display() {
