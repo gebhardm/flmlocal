@@ -2,7 +2,7 @@
 Installing the [fluksometer](http://flukso.net) alternative visualizations is fairly easy. In the following I will provide a step-by-step description to change the FLM's default landing page (the pages you get when opening the FLM's local IP address in a browser window) to provide a bunch of alternative display variants as described in the [flmlocal's ReadMe](https://github.com/gebhardm/flmlocal/blob/master/README.md) file.
 
 ##The beginning
-You have your fluksometer up and running and know its local IP address; in this example I will use `192.168.0.114`. When accessing this address in a browser, you will get following display.
+You have your fluksometer up and running with the newest firmware version (currently 2.4.7) and know its local IP address; in this example I will use `192.168.0.114`. When accessing this address in a browser, you will get following display.
 
 <img src="FLM_factory_homepage.png" width=600px> 
 
