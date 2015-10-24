@@ -23,6 +23,8 @@ By that you gain direct access to the different visualization alternatives direc
 
 in your browser (you may find the FLM also through Bonjour). Be aware that due to overcrowding by the larger number of navigation options I condensed the selection of the differen configuration and visualization pages into dropdown menus.
 
+For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file.
+
 All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything further (especially no Java).
 
 <img src="FLMlocalGauge.png" width=500px>
