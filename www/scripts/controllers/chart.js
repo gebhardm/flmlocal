@@ -174,37 +174,42 @@ var ChartCtrl = function($scope) {
     function chart_sensor(sensor) {
         var data = new Array();
         var qtime, qval, deltax, deltat;
-        var i, n = 60;
-        // initialize data collection for charting
-        data = [];
-        deltax = 0;
-        deltat = 0;
+        var sumt, sumx;
+        var lastt;
+        var i, n = 30;
+        data = []; deltax = 0; deltat = 0; sumx = 0; sumt = 0;
+        if (sensors[sensor].data.length > 0) lastt = sensors[sensor].data[0][0] * 1e3;
         for (i = 1; i < sensors[sensor].data.length; i++) {
             qtime = sensors[sensor].data[i][0] * 1e3;
-            deltax += sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
-            deltat += sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
-            if (deltat >= n || i == sensors[sensor].data.length - 1) {
+            deltax = sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
+            deltat = sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
+            sumx += deltax;
+            sumt += deltat;
+            if (sumt >= n || i == (sensors[sensor].data.length - 1)) {
                 // compute the different sensor types
                 switch (sensors[sensor].type) {
                   case "electricity":
                     // calculate the wattage from the given Wh values in time interval
-                    qval = 3600 * deltax / deltat;
+                    qval = 3600 * sumx / sumt;
                     break;
 
                   case "water":
                   case "gas":
                     // sum up the volume flown during a time interval; no division here
-                    qval = deltax;
+                    qval = sumx;
                     break;
 
                   default:
-                    qval = deltax;
+                    qval = sumx;
                     break;
                 }
-                deltax = 0;
-                deltat = 0;
-                data.push([ qtime, Math.round(qval * 10) / 10 ]);
+                qval = Math.round(qval * 10) / 10;
+                sumx = 0;
+                sumt = 0;
+                if (deltat >= n) data.push([ lastt, qval ]);
+                data.push([ qtime, qval ]);
             }
+            lastt = qtime;
         }
         // check if chart has to be altered or a new series has to be added
         var obj = chart.filter(function(o) {
