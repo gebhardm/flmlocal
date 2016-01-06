@@ -85,7 +85,7 @@ var ChartCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/#");
+        client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/query/+/+");
     }
     // event handler on connection lost
@@ -155,10 +155,11 @@ var ChartCtrl = function($scope) {
         qto = topic[5];
         qtime = tmpo.h.head[0];
         qval = tmpo.h.head[1];
+        // retrieve the sensor time series in the selected query interval
         for (i = 0; i < tmpo.v.length; i++) {
             qtime += tmpo.t[i];
             qval += tmpo.v[i];
-            if (qfrom <= qtime && qtime <= qto) {
+            if ((qfrom <= qtime) && (qtime <= qto)) {
                 sensors[tmpo.h.cfg.id].data.push([ qtime, qval ]);
             }
         }
