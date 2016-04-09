@@ -9,9 +9,9 @@ The implementation sits on top of the [Paho JavaScript client](https://eclipse.o
 To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4.x.<br>
 Alternatively [download the ZIP](https://github.com/gebhardm/flmlocal/archive/master.zip) and unpack it, but be aware that you then cannot get updates with an easy `pull`. So, take some time to learn about [Git](http://git-scm.com/) and install it on your computer.
 
-The current implementation reflects the state as of the Fluksometer firmware version 2.4.6 (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten - factory reset remains unchanged, of course).<br>
+The current implementation reflects the state as of the Fluksometer firmware version 2.5.0 (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten - factory reset remains unchanged, of course).<br>
 
-Use the linux/OSX command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a 
+Use the linux/OS X command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a 
 
     scp -r * root@<FLM ip address>:/www/
 
@@ -52,13 +52,31 @@ Note that here the `<sensor id>` is taken as name as long as you are not publish
 <img src="FLMlocalPanel.png" width=500px>
 
 ## Querying TMPO data
-Another feature of firmware 2.4.x is, that there is an FLM local storage of counter values. This feature is called **TMPO**; refer to the corresponding [announcement](https://www.flukso.net/content/r246-release-notes) for more information.
+Another feature of firmware 2.4.x onwards is, that there is an FLM local storage of counter values. This feature is called **TMPO**; refer to the corresponding [announcement](https://www.flukso.net/content/r246-release-notes) for more information.
 
 With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a query daemon capable to retrieve locally stored TMPO time series files and visualize them; this may be used for data analysis without having to store data on an external database.
 
-To install this feature, copy the [query.lua](/usr/sbin/queryd.lua) file to the `/usr/sbin` folder of your FLM using **scp** and run it with `lua /usr/sbin/queryd.lua &`.
-As an alternative you may install this also as a "real" daemon by adding a symbolic link `ln -s /usr/sbin/luad /usr/sbin/queryd` and starting the query daemon by `/usr/sbin/queryd -u flukso`; a [pull request](https://github.com/flukso/flm02/pull/7) for integration into the FLM firmware standard is sent, that also includes proper startup on boot.
+### TMPO query daemon
+To install this feature, copy the [queryd.lua](/usr/sbin/queryd.lua) file to the `/usr/sbin` folder of your FLM using **scp**.
 
+    scp queryd.lua root@<FLM IP address>:/usr/sbin/queryd.lua
+
+This query provider you may run with `lua /usr/sbin/queryd.lua &`.
+
+As an alternative you may install this also as a "real" daemon. For this you have to add a  symbolic link
+
+    ln -s /usr/sbin/luad /usr/sbin/queryd
+    
+and start the query daemon by
+
+    /usr/sbin/queryd -u flukso`
+    
+A [pull request](https://github.com/flukso/flm02/pull/7) for integration into the FLM firmware standard is sent, that also includes proper startup on boot.
+
+If you want to add this feature manually, then you have to change the `/etc/init.d/flukso` initialization file accordingly. Make a backup first! (`cp /etc/init.d/flukso /etc/init.d/flukso.bak`)
+Take a look at a reference [flukso.init](/etc/init.d/flukso) file for what to change (basically it is just the start and stop of the query daemon).
+
+### Query daemon functionality
 The query daemon works as follows:
 
 Sending an MQTT message to the FLM's MQTT broker with following content
