@@ -126,8 +126,9 @@ var GraphCtrl = function($scope) {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
                     }
                 }
             }

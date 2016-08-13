@@ -32,7 +32,7 @@ angular.module('flmUiApp', [
         controller: 'MainCtrl',
         tagName: null
       })
-      .when('/sensor', {
+      .when('/port', {
         templateUrl: 'views/port.html',
         controller: 'PortCtrl',
         tagName: 'port'

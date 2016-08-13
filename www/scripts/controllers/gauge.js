@@ -109,8 +109,9 @@ var GaugeCtrl = function($scope) {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
                     }
                 }
             }
@@ -182,10 +183,12 @@ var GaugeCtrl = function($scope) {
                 $scope.$apply(function() {
                     $scope.gauges = row;
                 });
-                var limit = 0, decimals = 0;
-                if (sensor.unit == "W") limit = 250; else if (sensor.unit == "°C") {
+                var limit = 0, decimals = 2;
+                if (sensor.unit == "W") {
+                    limit = 250;
+                    decimals = 0;
+                } else if (sensor.unit == "°C") {
                     limit = 50;
-                    decimals = 2;
                 } else limit = 100;
                 limit = sensor.value > limit ? sensor.value : limit;
                 sensor.display = new JustGage({

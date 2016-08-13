@@ -115,8 +115,9 @@ var ConsumptionCtrl = function($scope) {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
                     }
                 }
             }
@@ -199,11 +200,11 @@ var ConsumptionCtrl = function($scope) {
             if (sensors[s].unit === "W") {
                 switch (sensors[s].type) {
                   case "Production":
-                    productionValue += sensors[s].value;
+                    productionValue += Math.round(sensors[s].value);
                     break;
 
                   case "Consumption":
-                    consumptionValue += sensors[s].value;
+                    consumptionValue += Math.round(sensors[s].value);
                     break;
 
                   default:

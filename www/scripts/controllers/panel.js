@@ -104,13 +104,14 @@ var PanelCtrl = function($scope) {
                         sensor = {};
                         sensor.id = cfg.id;
                         if (cfg.port !== undefined) sensor.port = cfg.port[0];
+                        if (cfg.subtype !== undefined) sensor.subtype = cfg.subtype;
                         if (flx !== undefined) {
-                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + cfg.subtype;
                         }
                         sensors.push(sensor);
                     } else {
                         if (flx !== undefined) {
-                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + cfg.subtype;
                         }
                     }
                 }
@@ -165,6 +166,8 @@ var PanelCtrl = function($scope) {
                     break;
                 }
             }
+            // round to three digits
+            sensor.gaugevalue = Math.round(sensor.gaugevalue * 1000) / 1000;
             // create and fill an array of last n gauge values
             if (sensor.series === undefined) {
                 sensor.series = new Array();
@@ -175,7 +178,7 @@ var PanelCtrl = function($scope) {
 
           case "counter":
             sensor.countertimestamp = new Date(value[0] * 1e3).toLocaleString();
-            sensor.countervalue = value[1] / 1e3;
+            sensor.countervalue = Math.round(value[1] * 1000) / 1e6;
             sensor.counterunit = "k" + value[2];
             break;
 
