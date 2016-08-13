@@ -3,10 +3,10 @@
 --[[
 
     queryd.lua - Flukso timeseries query daemon
-    
+
     Copyright (C) 2014 Bart Van Der Meerssche <bart@flukso.net>
-                  2015 Markus Gebhard <markus.gebhard@web.de>
-    
+                  2016 Markus Gebhard <markus.gebhard@web.de>
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -48,7 +48,7 @@ local TIMESTAMP_MIN = 1234567890
 -- TMPO params
 local TMPO_FORMAT_VERSION = 1
 local TMPO_NICE = 10
-local TMPO_BASE_PATH = "/usr/share/tmpo/sensor/"
+local TMPO_BASE_PATH = uci:get("flukso", "tmpo", "root") .. "/tmpo/sensor/"
 local TMPO_PATH_TPL = TMPO_BASE_PATH .. "%s/%s/%s/%s" -- [sid]/[rid]/[lvl]/[bid]
 local TMPO_REGEX_QUERY = "^/query/(%x+)/tmpo$"
 local TMPO_TOPIC_QUERY_PUB = "/sensor/%s/query/%s/%s" -- provide queried data as payload
@@ -186,8 +186,8 @@ local ut
 ut = uloop.timer(function()
 	-- mosquitto connection maintenance
 	local success, errno, err = mqtt:misc()
-	if not success then 
-		error(MOSQ_ERROR:format(err)) 
+	if not success then
+		error(MOSQ_ERROR:format(err))
 	end
 	ut:set(ULOOP_TIMEOUT_MS)
      end, ULOOP_TIMEOUT_MS)
