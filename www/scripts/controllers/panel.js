@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2014 Markus Gebhard <markus.gebhard@web.de>
+Copyright (c) 2016 Markus Gebhard <markus.gebhard@web.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,8 @@ var PanelCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
+    // FLM port configuration
+    var flx;
     // initialize panel
     var client;
     var reconnectTimeout = 2e3;
@@ -54,6 +56,7 @@ var PanelCtrl = function($scope) {
         client.connect(options);
     }
     function onConnect() {
+        client.subscribe("/device/+/config/flx");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
         client.subscribe("/sensor/+/counter");
@@ -83,9 +86,13 @@ var PanelCtrl = function($scope) {
         }
     }
     function handle_device(topic, payload) {
-        var deviceID = topic[2];
-        if (topic[3] == "config") {
-            var config = JSON.parse(payload);
+        var config = JSON.parse(payload);
+        switch (topic[4]) {
+          case "flx":
+            flx = config;
+            break;
+
+          case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
                 if (cfg.enable == "1") {
@@ -93,14 +100,22 @@ var PanelCtrl = function($scope) {
                     var sensor = sensors.filter(function(s) {
                         return s.id == sensorId;
                     });
-                    if (sensor[0] == null) {
+                    if (sensor[0] === undefined) {
                         sensor = {};
                         sensor.id = cfg.id;
-                        sensor.name = cfg.function;
+                        if (cfg.port !== undefined) sensor.port = cfg.port[0];
+                        if (flx !== undefined) {
+                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                        }
                         sensors.push(sensor);
-                    } else sensor[0].name = cfg.function;
+                    } else {
+                        if (flx !== undefined) {
+                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                        }
+                    }
                 }
             }
+            break;
         }
     }
     function handle_sensor(topic, payload) {
@@ -111,7 +126,7 @@ var PanelCtrl = function($scope) {
         var sIndex = sensors.filter(function(s) {
             return s.id == sensorId;
         });
-        if (sIndex[0] == null) {
+        if (sIndex[0] === undefined) {
             sensor.id = sensorId;
             sensor.name = sensorId;
             sensors.push(sensor);
@@ -119,7 +134,7 @@ var PanelCtrl = function($scope) {
         } else sensor = sIndex[0];
         switch (msgType) {
           case "gauge":
-            if (value.length == null) {
+            if (value.length === undefined) {
                 sensor.gaugevalue = value;
                 sensor.gaugeunit = "";
                 sensor.gaugetimestamp = "";
@@ -151,7 +166,7 @@ var PanelCtrl = function($scope) {
                 }
             }
             // create and fill an array of last n gauge values
-            if (sensor.series == null) {
+            if (sensor.series === undefined) {
                 sensor.series = new Array();
             }
             if (sensor.series.length == 60) sensor.series.shift();

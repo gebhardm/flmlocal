@@ -6,10 +6,10 @@ It contains a native implementation of [Justgage](http:/justgage.com) gauges, [F
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer with firmware version >2.4.x.<br>
+To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer version 03E with firmware version 3.5.8-beta.<br>
 Alternatively [download the ZIP](https://github.com/gebhardm/flmlocal/archive/master.zip) and unpack it, but be aware that you then cannot get updates with an easy `pull`. So, take some time to learn about [Git](http://git-scm.com/) and install it on your computer.
 
-The current implementation reflects the state as of the Fluksometer firmware version 2.5.0 (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten - factory reset remains unchanged, of course).<br>
+The current implementation reflects the state as of the FLM03E firmware version 3.5.8-beta (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
 Use the linux/OS X command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a 
 
@@ -25,36 +25,17 @@ in your browser (you may find the FLM also through Bonjour). Be aware that due t
 
 For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file.
 
-All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything further (especially no Java).
+All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything else.
 
 <img src="FLMlocalGauge.png" width=500px>
 
 ## Recognizing device configuration
-From Fluksometer firmware version 2.4.6 onwards there is a dedicated MQTT topic on which the FLM's configuration is published; on topic `/device/<device id>/config/sensor` all parameters are available that indicate specific sensor settings. This is used to show the actual sensor names instead of just their IDs. For more information, please refer to the next section.
-
-## Show arbitrary sensors
-Even though the primary purpose of this implementation is to visualize Fluksometer readings, it is capable to handle also other information passed to the FLM's MQTT broker (try it with [mosquitto](http://mosquitto.org/)).<br>
-So, if you have, for example, an [Arduino Ethernet](https://github.com/gebhardm/energyhacks/tree/master/AVRNetIOduino/AVRNetIO_MQTT_DS_DHT) publishing sensor data (for example on temperature or humidity), this can be visualized as well, if you properly address the FLM MQTT broker. The gauge, graph and panel take all sensor information formatted as (payload in either JSON format)
-
-    topic: /sensor/<sensor id>/gauge
-    payload: <value>
-            [<value>]
-            [<value>, <unit>]
-            [<timestamp>, <value>, <unit>]
-
-Note that here the `<sensor id>` is taken as name as long as you are not publishing any device configuration topic with ID, name and if enabled (other parameters are currently not used, like `class` and `type`, but may in the future).
-
-    topic: /device/<device id>/config/sensor
-    payload: { "<sensor enum>":{ "id":"<sensor id>",
-                                 "function":"<sensor name>",
-                                 "enable":"1" } }
-
-<img src="FLMlocalPanel.png" width=500px>
+The Fluksometer provides dedicated MQTT topics to reflect its configuration. On topic `/device/<device id>/config/sensor` all parameters are available that indicate specific sensor settings. `/device/<device id>/config/flx` publishes the actual port configuration of the FLM itself. This is used to show the actual sensor names instead of just their IDs.
 
 ## Querying TMPO data
-Another feature of firmware 2.4.x onwards is, that there is an FLM local storage of counter values. This feature is called **TMPO**; refer to the corresponding [announcement](https://www.flukso.net/content/r246-release-notes) for more information.
+Introduced with the FLM02 there is an FLM local storage of counter values. This feature is called **TMPO**; refer to the corresponding [announcement](https://www.flukso.net/content/r246-release-notes) for more information.
 
-With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart tab on the FLM exists a query daemon capable to retrieve locally stored TMPO time series files and visualize them; this may be used for data analysis without having to store data on an external database.
+With [/usr/sbin/queryd.lua](/usr/sbin/queryd.lua) and the corresponding chart visualization on the FLM exists a query daemon capable to retrieve locally stored TMPO time series files and visualize them; this may be used for data analysis without having to store data on an external database.
 
 ### TMPO query daemon
 To install this feature, copy the [queryd.lua](/usr/sbin/queryd.lua) file to the `/usr/sbin` folder of your FLM using **scp**.
@@ -71,9 +52,7 @@ and start the query daemon by
 
     /usr/sbin/queryd -u flukso`
     
-A [pull request](https://github.com/flukso/flm02/pull/7) for integration into the FLM firmware standard is sent, that also includes proper startup on boot.
-
-If you want to add this feature manually, then you have to change the `/etc/init.d/flukso` initialization file accordingly. Make a backup first! (`cp /etc/init.d/flukso /etc/init.d/flukso.bak`)
+For automated start on reboot you have to change the `/etc/init.d/flukso` initialization file accordingly. Make a backup first! (`cp /etc/init.d/flukso /etc/init.d/flukso.bak`)
 Take a look at a reference [flukso.init](/etc/init.d/flukso) file for what to change (basically it is just the start and stop of the query daemon).
 
 ### Query daemon functionality

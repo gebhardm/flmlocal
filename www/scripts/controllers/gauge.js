@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2014 Markus Gebhard <markus.gebhard@web.de>
+Copyright (c) 2016 Markus Gebhard <markus.gebhard@web.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,8 @@ var GaugeCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
+    // the FLM port configuration
+    var flx;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -58,7 +60,8 @@ var GaugeCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/#");
+        client.subscribe("/device/+/config/flx");
+        client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
     // event handler on connection lost
@@ -93,19 +96,25 @@ var GaugeCtrl = function($scope) {
     }
     // handler for device configuration
     function handle_device(topic, payload) {
-        var deviceID = topic[2];
-        if (topic[3] == "config") {
-            var config = JSON.parse(payload);
+        var config = JSON.parse(payload);
+        switch (topic[4]) {
+          case "flx":
+            flx = config;
+            break;
+
+          case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
                 if (cfg.enable == "1") {
-                    if (sensors[cfg.id] == null) {
-                        sensors[cfg.id] = new Object();
-                        sensors[cfg.id].id = cfg.id;
-                        sensors[cfg.id].name = cfg.function;
-                    } else sensors[cfg.id].name = cfg.function;
+                    if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
+                    sensors[cfg.id].id = cfg.id;
+                    if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (flx !== undefined) {
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                    }
                 }
             }
+            break;
         }
     }
     // handler for sensor readings
@@ -119,16 +128,17 @@ var GaugeCtrl = function($scope) {
         var value = JSON.parse(payload);
         // the transferred payload
         // check if sensor was already retrieved
-        if (sensors[sensorId] == null) {
+        if (sensors[sensorId] === undefined) {
             sensors[sensorId] = new Object();
             sensor.id = sensorId;
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
+        sensors[sensorId] = sensor;
         // now compute the received mqttMessage
         switch (msgType) {
           case "gauge":
             // handle the payload to obtain gauge values
-            if (value.length == null) {
+            if (value.length === undefined) {
                 sensor.value = value;
                 sensor.unit = "";
             } else {
@@ -158,12 +168,12 @@ var GaugeCtrl = function($scope) {
                 }
             }
             // now build the gauge display
-            if (sensor.display == null) {
+            if (sensor.display === undefined) {
                 numGauges++;
                 var rowIndex = Math.floor((numGauges - 1) / 2);
                 var colIndex = numGauges % 2;
                 // use a trick to scale the first gauge at 50%
-                if (row[rowIndex] == null) row[rowIndex] = new Array();
+                if (row[rowIndex] === undefined) row[rowIndex] = new Array();
                 if (numGauges > 1 && colIndex == 0) row[rowIndex].pop();
                 row[rowIndex].push({
                     id: sensorId

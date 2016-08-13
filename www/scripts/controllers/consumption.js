@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2015 Markus Gebhard <markus.gebhard@web.de>
+Copyright (c) 2016 Markus Gebhard <markus.gebhard@web.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,8 @@ var ConsumptionCtrl = function($scope) {
     } else {
         $scope.bgrdColor = true;
     }
+    // the fluksometer port configuration
+    var flx;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -68,6 +70,7 @@ var ConsumptionCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
+        client.subscribe("/device/+/config/flx");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
@@ -99,19 +102,25 @@ var ConsumptionCtrl = function($scope) {
     }
     // handler for device configuration
     function handle_device(topic, payload) {
-        var deviceID = topic[2];
-        if (topic[3] == "config") {
-            var config = JSON.parse(payload);
+        var config = JSON.parse(payload);
+        switch (topic[4]) {
+          case "flx":
+            flx = config;
+            break;
+
+          case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
                 if (cfg.enable == "1") {
-                    if (sensors[cfg.id] == null) {
-                        sensors[cfg.id] = new Object();
-                        sensors[cfg.id].id = cfg.id;
-                        sensors[cfg.id].name = cfg.function;
-                    } else sensors[cfg.id].name = cfg.function;
+                    if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
+                    sensors[cfg.id].id = cfg.id;
+                    if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (flx !== undefined) {
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                    }
                 }
             }
+            break;
         }
     }
     // handler for sensor readings
@@ -125,11 +134,12 @@ var ConsumptionCtrl = function($scope) {
         var value = JSON.parse(payload);
         // the transferred payload
         // check if sensor was already retrieved
-        if (sensors[sensorId] == null) {
+        if (sensors[sensorId] === undefined) {
             sensors[sensorId] = new Object();
             sensor.id = sensorId;
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
+        sensors[sensorId] = sensor;
         // now compute the received mqttMessage
         switch (msgType) {
           case "gauge":
@@ -159,7 +169,7 @@ var ConsumptionCtrl = function($scope) {
                 break;
             }
             // set up the selection and the local storage of sensor flow direction
-            if (sensor.type == null && sensor.unit === "W") {
+            if (sensor.type === undefined && sensor.unit === "W") {
                 $("#choices").append("<div class='form-inline'>" + "<label for='" + sensor.id + "' class='control-label span2'>" + sensor.name + "</label>" + "<select id='" + sensor.id + "'>" + "<option>Consumption</option>" + "<option>Production</option>" + "<option>Ignore</option>" + "</select>" + "</div>");
                 // on change of flow direction store the respective value
                 $("#" + sensor.id).change(sensor, function(event) {

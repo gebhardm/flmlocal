@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2015 Markus Gebhard <markus.gebhard@web.de>
+Copyright (c) 2016 Markus Gebhard <markus.gebhard@web.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@ var ChartCtrl = function($scope) {
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
+    // the FLM03 port configuration
+    var flx;
     // the FLM's web socket port from mosquitto
     var broker = location.hostname;
     var port = 8083;
@@ -85,6 +87,7 @@ var ChartCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
+        client.subscribe("/device/+/config/flx");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/query/+/+");
     }
@@ -114,23 +117,31 @@ var ChartCtrl = function($scope) {
             break;
         }
     }
-    // handler for device configuration
+    // handler for device configuration - needed to send actual query requests
     function handle_device(topic, payload) {
-        var deviceID = topic[2];
-        if (topic[3] == "config") {
-            var config = JSON.parse(payload);
+        var config = JSON.parse(payload);
+        switch (topic[4]) {
+          case "flx":
+            flx = config;
+            for (var id in sensors) {
+                if (sensors[id].port !== undefined) sensors[id].name = flx[sensors[id].port].name + " " + sensors[id].subtype;
+            }
+            break;
+
+          case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
                 if (cfg.enable == "1") {
-                    if (sensors[cfg.id] == null) {
-                        sensors[cfg.id] = new Object();
-                        sensors[cfg.id].id = cfg.id;
-                        sensors[cfg.id].name = cfg.function;
-                        sensors[cfg.id].type = cfg.type;
-                        sensors[cfg.id].data = new Array();
-                    } else sensors[cfg.id].name = cfg.function;
+                    if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
+                    sensors[cfg.id].id = cfg.id;
+                    if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (flx !== undefined) {
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + flx[cfg.port].subtype;
+                    }
+                    sensors[cfg.id].data = new Array();
                 }
             }
+            break;
         }
     }
     // compute the received data series
@@ -144,7 +155,7 @@ var ChartCtrl = function($scope) {
             str += String.fromCharCode(decom[i]);
         }
         var tmpo = JSON.parse(str);
-        if (sensors[tmpo.h.cfg.id] == null) {
+        if (sensors[tmpo.h.cfg.id] === undefined) {
             sensors[tmpo.h.cfg.id] = new Object();
             sensors[tmpo.h.cfg.id].id = tmpo.h.cfg.id;
             sensors[tmpo.h.cfg.id].name = tmpo.h.cfg.function;
@@ -159,7 +170,7 @@ var ChartCtrl = function($scope) {
         for (i = 0; i < tmpo.v.length; i++) {
             qtime += tmpo.t[i];
             qval += tmpo.v[i];
-            if ((qfrom <= qtime) && (qtime <= qto)) {
+            if (qfrom <= qtime && qtime <= qto) {
                 sensors[tmpo.h.cfg.id].data.push([ qtime, qval ]);
             }
         }
@@ -178,7 +189,11 @@ var ChartCtrl = function($scope) {
         var sumt, sumx;
         var lastt;
         var i, n = 30;
-        data = []; deltax = 0; deltat = 0; sumx = 0; sumt = 0;
+        data = [];
+        deltax = 0;
+        deltat = 0;
+        sumx = 0;
+        sumt = 0;
         if (sensors[sensor].data.length > 0) lastt = sensors[sensor].data[0][0] * 1e3;
         for (i = 1; i < sensors[sensor].data.length; i++) {
             qtime = sensors[sensor].data[i][0] * 1e3;
@@ -186,7 +201,7 @@ var ChartCtrl = function($scope) {
             deltat = sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
             sumx += deltax;
             sumt += deltat;
-            if (sumt >= n || i == (sensors[sensor].data.length - 1)) {
+            if (sumt >= n || i == sensors[sensor].data.length - 1) {
                 // compute the different sensor types
                 switch (sensors[sensor].type) {
                   case "electricity":
