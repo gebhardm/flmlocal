@@ -1,7 +1,10 @@
 #!/bin/sh /etc/rc.common
 # Copyright (c) 2011 Bart Van Der Meerssche
 
-START=98
+START=99
+
+SERVICE_DAEMONIZE=1
+SERVICE_WRITE_PID=1
 
 set_version()
 {
@@ -12,72 +15,54 @@ set_version()
 	logger 'copying flukso package version into system uci file at firstboot'
 }
 
-load_config()
+load_config3()
 {
-	MODEL_HEX=$(hexdump -v -e '1/1 "%.2x"' -s $((0x11800)) -n 6 /dev/mtd6)
-	MODEL=$(hexdump -v -e '"%.6s"' -s $((0x11800)) -n 6 /dev/mtd6)
-	SERIAL=$(hexdump -v -e '"%.10s"' -s $((0x11806)) -n 10 /dev/mtd6)
+	MODEL=$(hexdump -v -e '"%.6s"' -s $((0x00)) -n 6 /dev/mtd4)
+	SERIAL=$(hexdump -v -e '"%.10s"' -s $((0x06)) -n 10 /dev/mtd4)
+	KEY=$(hexdump -v -e '1/1 "%.2x"' -s $((0x10)) -n 16 /dev/mtd4)
+	DEVICE=$(hexdump -v -e '1/1 "%.2x"' -s $((0x30)) -n 16 /dev/mtd4)
+	HOSTNAME=flukso-$(hexdump -v -e '1/1 "%.2x"' -s $((0x30)) -n 3 /dev/mtd4)
+	uci set system.@system[0].model=$MODEL
+	uci set system.@system[0].serial=$SERIAL
+	uci set system.@system[0].key=$KEY
+	uci set system.@system[0].device=$DEVICE
+	uci set system.@system[0].hostname=$HOSTNAME
 
-	if [ $MODEL_HEX != ffffffffffff ]
-	then
-		uci set system.@system[0].model=$MODEL
-		uci set system.@system[0].serial=$SERIAL
-	fi
-
-	uci set system.@system[0].key=$(hexdump -v -e '1/1 "%.2x"' -s $((0x11000)) -n 16 /dev/mtd6)
-	uci set system.@system[0].device=$(hexdump -v -e '1/1 "%.2x"' -s $((0x11020)) -n 16 /dev/mtd6)
-	uci set system.@system[0].hostname=flukso-$(hexdump -v -e '1/1 "%.2x"' -s $((0x11020)) -n 3 /dev/mtd6)
-
-	for i in `seq 64`;
+	for i in `seq 128`;
 	do
-		ADDRESS=$((0x11020 + i * 0x10))
-		ID=$(hexdump -v -e '1/1 "%.2x"' -s $ADDRESS -n 16 /dev/mtd6)
-
-		if [ $ID == ffffffffffffffffffffffffffffffff ]
-		then
-			break
-		fi
-		
+		ADDRESS=$((0x30 + i * 0x10))
+		ID=$(hexdump -v -e '1/1 "%.2x"' -s $ADDRESS -n 16 /dev/mtd4)
 		uci set flukso.$i=sensor
 		uci set flukso.$i.id=$ID
-		uci set flukso.main.max_provisioned_sensors=$i
 	done
 
 	if [ $(uci get kube.main.collect_group) == 0 ]
 	then
 		# GRP will be in the range [1..211]
-		uci set kube.main.collect_group=$(($(hexdump -v -e '1/1 "%d"' -s $((0x11020)) -n 1 /dev/mtd6) % 210 + 1))
+		GRP=$(($(hexdump -v -e '1/1 "%d"' -s $((0x30)) -n 1 /dev/mtd4) % 210 + 1))
+		uci set kube.main.collect_group=$GRP
 	fi
 
-	uci set kube.main.key=$(hexdump -v -e '1/1 "%.2x"' -s $((0x11010)) -n 16 /dev/mtd6)
+	KUBE_KEY=$(hexdump -v -e '1/1 "%.2x"' -s $((0x20)) -n 16 /dev/mtd4)
+	uci set kube.main.key=$KUBE_KEY
 	uci commit
 
 	logger 'configuring flukso device and sensor ids at firstboot'
 }
 
-set_hw_version()
-{
-	MODEL=$(uci get system.@system[0].model)
-
-	if [ $MODEL == FLM02A ]
-	then
-		MINOR=1
-	elif [ $MODEL == FLM02B ]
-	then
-		MINOR=2
-	elif [ $MODEL == FLM02W ]
-	then
-		MINOR=0    
-	fi
-
-	uci set flukso.main.hw_minor=$MINOR
-	uci commit
-}
-
 program_sensor_board()
 {
-	fdude &> /tmp/fdude.out
-	logger 'flashing the sensor board at firstboot'
+	DEV=/dev/ttyATH0
+	FIRMWARE=/usr/bin/flx/e/firmware.bin
+	OUT=/tmp/stm32flash.out
+	echo out > /sys/class/gpio/gpio20/direction
+	for i in `seq 10`;
+	do
+		stm32flash -b 38400 -i 24,-20,20:-24,-20,20 -R -v -w $FIRMWARE $DEV &> $OUT
+		[ $? = 0 ] && break
+	done
+	echo in > /sys/class/gpio/gpio20/direction
+	logger 'flashing the flx at firstboot'
 }
 
 test_sensor_board()
@@ -85,116 +70,27 @@ test_sensor_board()
 	TEST=/usr/bin/ftest
 	IP=192.168.255.2
 	PORT=8080
-	RESULT=$($TEST; echo $?)
+#	RESULT=$($TEST; echo $?)
 
 	wget -s -q "http://$IP:$PORT/cgi-bin/test?result=$RESULT"
-}
-
-set_ttyS0_B_22()
-{
-	stty -F /dev/ttyS0 9600 min 255 time 1 \
-		-icanon -isig -iexten -echo -brkint -icrnl -ignbrk \
-		-igncr -inlcr -inpck -istrip -ixon -opost parenb \
-		inpck -parodd cs7 -cstopb
-}
-
-set_ttyS0_B_40()
-{
-	stty -F /dev/ttyS0 115200 min 255 time 1 \
-		-icanon -isig -iexten -echo -brkint -icrnl -ignbrk \
-		-igncr -inlcr -inpck -istrip -ixon -opost -parenb \
-		-inpck cs8 -cstopb
-}
-
-set_ttyS0_C()
-{
-	stty -F /dev/ttyS0 1200 min 255 time 1 \
-		-icanon -isig -iexten -echo -brkint -icrnl -ignbrk \
-		-igncr -inlcr -inpck -istrip -ixon -opost parenb \
-		inpck -parodd cs7 -cstopb
-}
-
-set_ttyS0_W()
-{
-	stty -F /dev/ttyS0 115200 min 255 time 1 \
-		-icanon -isig -iexten -echo -brkint -icrnl -ignbrk \
-		-igncr -inlcr -inpck -istrip -ixon -opost -parenb \
-		-inpck cs8 -cstopb
-}
-
-start_ww()
-{
-	FIRSTBOOT=$(uci get system.@system[0].firstboot)
-
-	if [ $FIRSTBOOT -eq '1' ]
-	then
-		uci set system.@system[0].firstboot='0'
-		uci set system.@system[0].restore='0'
-		uci commit
-	fi
-	
-	chmod 666 /sys/class/leds/globe/trigger
-	/usr/sbin/supd
-	/usr/sbin/wwd
-	/usr/sbin/tmpod -u flukso
-	/usr/sbin/queryd -u flukso
-	set_ttyS0_W
-	echo 0 > /sys/devices/virtual/gpio/gpio4/value
-	HEARTBEAT=/usr/bin/heartbeat
-	FCHECK=/usr/bin/fcheck
-	MINUTE=$(date '+%M')
-
-	# Tell the server we've had a reset
-	$HEARTBEAT 1 >&- 2>&- <&-
-
-	# Configure cron
-	echo -e "$MINUTE * * * * $HEARTBEAT 0\n*/15 * * * * $FCHECK" | crontab -
-
-	# Making sure all committed uci changes are written to flash
-	sync
 }
 
 start_fl()
 {
 	FIRSTBOOT=$(uci get system.@system[0].firstboot)
-
 	if [ $FIRSTBOOT -eq '1' ]
 	then
 		program_sensor_board
 	fi
 
-	chmod 666 /dev/spidev1.0
-	chmod 666 /sys/class/leds/globe/trigger
-	/usr/sbin/supd
-	/usr/sbin/spid -u flukso
-	/usr/sbin/fluksod -u flukso
-	/usr/sbin/tmpod -u flukso
-	/usr/sbin/queryd -u flukso
-
 	MODEL=$(uci get system.@system[0].model)
 
-	if [ $MODEL == FLM02B ]
-	then
-		DSMR=$(uci get flukso.main.dsmr)
-
-		if [ $DSMR == 2.2 ]
-		then
-			set_ttyS0_B_22
-		elif [ $DSMR == 4.0 ]
-		then
-			set_ttyS0_B_40
-		fi
-		/usr/sbin/parsed -u flukso
-		/usr/sbin/kubed -u flukso
-	fi
-
-	if [ $MODEL == FLM02C ]
-	then
-		set_ttyS0_C
-		/usr/sbin/parsed -u flukso
-		/usr/sbin/kubed -u flukso
-	fi
-
+	chmod 666 /sys/class/leds/globe/trigger
+	/usr/sbin/supd
+	service_start /usr/sbin/flxd
+	/usr/sbin/tmpod -u flukso
+	/usr/sbin/kubed -u flukso
+	/usr/sbin/queryd -u flukso
 
 	if [ $FIRSTBOOT -eq '1' ]
 	then
@@ -205,17 +101,6 @@ start_fl()
 		uci commit
 	fi
 
-	RESTORE=$(uci get system.@system[0].restore)
-
-	if [ $RESTORE -eq '1' ]
-	then
-		fbackup -r
-		fsync -s
-
-		uci set system.@system[0].restore='0'
-		uci commit
-	fi
-
 	HEARTBEAT=/usr/bin/heartbeat
 	FCHECK=/usr/bin/fcheck
 	MINUTE=$(date '+%M')
@@ -230,86 +115,34 @@ start_fl()
 	sync
 }
 
-stop_ww()
-{
-	crontab -r
-
-	/usr/sbin/tmpod -k
-	rm -rf /var/run/tmpod
-
-	/usr/sbin/queryd -k
-	rm -rf /var/run/queryd
-
-   	/usr/sbin/wwd -k
-	rm -rf /var/run/wwd
-
-	/usr/sbin/supd -k
-	rm -rf /var/run/supd
-}
-
-
 stop_fl()
 {
 	crontab -r
-
-	MODEL=$(uci get system.@system[0].model)
-
-	if [ $MODEL == FLM02B -o $MODEL == FLM02C ]
-	then
-		/usr/sbin/kubed -k
-		rm -rf /var/run/kubed
-
-		/usr/sbin/parsed -k
-		rm -rf /var/run/parsed
-	fi
-
+	/usr/sbin/kubed -k
+	rm -rf /var/run/kubed
 	/usr/sbin/tmpod -k
 	rm -rf /var/run/tmpod
-
-	/usr/sbin/queryd -k
-	rm -rf /var/run/queryd
-
-	/usr/sbin/fluksod -k
-	rm -rf /var/run/fluksod
-
-	/usr/sbin/spid -k
-	rm -rf /var/run/spid
-
+	service_stop /usr/sbin/flxd
 	/usr/sbin/supd -k
 	rm -rf /var/run/supd
+	/usr/sbin/queryd -k
+	rm -rf /var/run/queryd
 }
 
 start()
 {
 	FIRSTBOOT=$(uci get system.@system[0].firstboot)
-
 	if [ $FIRSTBOOT -eq '1' ]
 	then
 		set_version
-		load_config
-		set_hw_version
-		chown -R flukso:flukso /usr/share/tmpo
+		load_config3
+		chown flukso:flukso /flukso
 	fi
-
-	MODEL=$(uci get system.@system[0].model)
-
-	if [ $MODEL == FLM02W ]
-	then
-		start_ww
-	else
-		start_fl
-	fi
+	echo "flm03" > /tmp/sysinfo/board_name
+	start_fl
 }
 
 stop()
 {
-	MODEL=$(uci get system.@system[0].model)
-
-	if [ $MODEL == FLM02W ]
-	then
-		stop_ww
-	else
-		stop_fl
-	fi
+	stop_fl
 }
-
