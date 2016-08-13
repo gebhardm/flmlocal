@@ -124,7 +124,9 @@ var ChartCtrl = function($scope) {
           case "flx":
             flx = config;
             for (var id in sensors) {
-                if (sensors[id].port !== undefined) sensors[id].name = flx[sensors[id].port].name + " " + sensors[id].subtype;
+                if (sensors[id].port !== undefined) {
+                    sensors[id].name = flx[sensors[id].port].name + " " + sensors[id].subtype;
+                }
             }
             break;
 
@@ -134,10 +136,10 @@ var ChartCtrl = function($scope) {
                 if (cfg.enable == "1") {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
-                    if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (cfg.type !== undefined) sensors[cfg.id].type = cfg.type;
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
-                    if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                    if (flx !== undefined && flx[cfg.port] !== undefined) {
+                        sensors[cfg.id].name = flx[cfg.port[0]].name + " " + cfg.subtype;
                     }
                     sensors[cfg.id].data = new Array();
                 }
@@ -159,8 +161,13 @@ var ChartCtrl = function($scope) {
         if (sensors[tmpo.h.cfg.id] === undefined) {
             sensors[tmpo.h.cfg.id] = new Object();
             sensors[tmpo.h.cfg.id].id = tmpo.h.cfg.id;
-            sensors[tmpo.h.cfg.id].name = tmpo.h.cfg.function;
+            if (flx !== undefined) {
+                sensors[tmpo.h.cfg.id].name = flx[tmpo.h.cfg.port[0]].name + " " + tmpo.h.cfg.subtype;
+            } else {
+                sensors[tmpo.h.cfg.id].name = tmpo.h.cfg.id;
+            }
             sensors[tmpo.h.cfg.id].type = tmpo.h.cfg.type;
+            sensors[tmpo.h.cfg.id].subtype = tmpo.h.cfg.subtype;
             sensors[tmpo.h.cfg.id].data = new Array();
         }
         qfrom = topic[4];
