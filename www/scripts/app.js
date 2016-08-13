@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bart Van Der Meerssche <bart@flukso.net>
+ * Copyright (c) 2016 Bart Van Der Meerssche <bart@flukso.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,29 +33,24 @@ angular.module('flmUiApp', [
         tagName: null
       })
       .when('/sensor', {
-        templateUrl: 'views/sensor.html',
-        controller: 'SensorCtrl',
-        tagName: 'sensor'
+        templateUrl: 'views/port.html',
+        controller: 'PortCtrl',
+        tagName: 'port'
       })
       .when('/kube', {
         templateUrl: 'views/kube.html',
         controller: 'KubeCtrl',
         tagName: 'kube'
       })
-      .when('/wifi', {
-        templateUrl: 'views/wifi.html',
-        controller: 'WifiCtrl',
-        tagName: 'wifi'
+      .when('/network', {
+        templateUrl: 'views/network.html',
+        controller: 'NetworkCtrl',
+        tagName: 'network'
       })
       .when('/status', {
         templateUrl: 'views/status.html',
         controller: 'StatusCtrl',
         tagName: 'status'
-      })
-      .when('/services', {
-        templateUrl: 'views/services.html',
-        controller: 'ServicesCtrl',
-        tagName: 'services'
       })
       .when('/syslog', {
         templateUrl: 'views/syslog.html',
@@ -91,7 +86,7 @@ angular.module('flmUiApp', [
         templateUrl: 'views/panel.html',
         controller: 'PanelCtrl',
         tagName: 'panel'
-      })	  
+      })
       .otherwise({
         redirectTo: '/'
       });
@@ -99,28 +94,24 @@ angular.module('flmUiApp', [
   .controller('MenuCtrl', function($scope) {
     $scope.menus = [
   {
-    title: "configuration", 
-    action: "#", 
+    title: "configuration",
+    action: "#",
     menus: [
       {
         title: "status",
         action: "#/status"
       },
       {
-        title: "wifi",
-        action: "#/wifi"
+        title: "network",
+        action: "#/network"
       },
       {
-        title: "sensor",
-        action: "#/sensor"
+        title: "port",
+        action: "#/port"
       },
       {
         title: "kube",
         action: "#/kube"
-      },
-      {
-        title: "services",
-        action: "#/services"
       },
       {
         title: "syslog",
@@ -133,8 +124,8 @@ angular.module('flmUiApp', [
     ]
   },
   {
-    title: "visualization", 
-    action: "#", 
+    title: "visualization",
+    action: "#",
     menus: [
       {
         title: "chart",
