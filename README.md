@@ -6,8 +6,7 @@ It contains a native implementation of [Justgage](http:/justgage.com) gauges, [F
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, `git clone` the [repository](http://github.com/gebhardm/flmlocal) and copy the content of the [www/](www/) folder to your Fluksometer version 03E with firmware version 3.5.8-beta.<br>
-Alternatively [download the ZIP](https://github.com/gebhardm/flmlocal/archive/master.zip) and unpack it, but be aware that you then cannot get updates with an easy `pull`. So, take some time to learn about [Git](http://git-scm.com/) and install it on your computer.
+To utilize this implementation, clone or download the [repository](https://github.com/gebhardm/flmlocal/tree/flm03) (branch `flm03`) and copy the content of the [www/](www/) folder to your Fluksometer version 03E with firmware version 3.5.8-beta.<br><img src="images/clone_or_download.png"><br>
 
 The current implementation reflects the state as of the FLM03E firmware version 3.5.8-beta (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
@@ -21,16 +20,18 @@ By that you gain direct access to the different visualization alternatives direc
 
     http://<flm ip address>
 
-in your browser (you may find the FLM also through Bonjour). Be aware that due to overcrowding by the larger number of navigation options I condensed the selection of the differen configuration and visualization pages into dropdown menus.
+in your browser (you may find the FLM also through Bonjour/service discovery). Be aware that due to overcrowding by the larger number of navigation options I condensed the selection of the different configuration and visualization pages into corresponding dropdown menus.
 
-For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file.
+<img src="images/flm03_menu.png">
+
+For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file (this is equivalent for FLM02 and FLM03, respectively).
 
 All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything else.
 
-<img src="FLMlocalGauge.png" width=500px>
+<img src="images/flm03_panel.png" width=500px>
 
 ## Recognizing device configuration
-The Fluksometer provides dedicated MQTT topics to reflect its configuration. On topic `/device/<device id>/config/sensor` all parameters are available that indicate specific sensor settings. `/device/<device id>/config/flx` publishes the actual port configuration of the FLM itself. This is used to show the actual sensor names instead of just their IDs.
+The Fluksometer provides dedicated MQTT topics to reflect its configuration. On topic `/device/<device id>/config/sensor` all parameters are available that indicate specific sensor settings. `/device/<device id>/config/flx` publishes the actual port configuration of the FLM itself, together with the port given name. This in combination is used to show the actual sensor names instead of just their IDs.
 
 ## Querying TMPO data
 Introduced with the FLM02 there is an FLM local storage of counter values. This feature is called **TMPO**; refer to the corresponding [announcement](https://www.flukso.net/content/r246-release-notes) for more information.
@@ -71,14 +72,16 @@ will be computed by the query daemon. Corresponding to the sent query time inter
 The content of the queried data then is decompressed and computed with a JS script in the browser. It is displayed as a FluksoChart using Flot charts like in the FluksoGraph.<br>
 For smoothing the graphs (visualized is the first derivative of the counter increase values with respect to time - actually a "simple difference calculation" of the TMPO-stored counter values) a continuous average on minute based values is displayed. This is done as on raw data there are extreme "bumps" due to the discreteness and approximation of the original counter value set also on second base; if displayed directly, you will experience a kind of "pulse width modulation" which is rather inconvenient to the eye and stresses the Flot chart to an extreme. You may play with the value of *n* in [chart.js](https://github.com/gebhardm/flmlocal/blob/master/www/scripts/controllers/chart.js#L176), *function chart_sensor(sensor)*.
 
-<img src="FLMlocalChart.png" width=500px>
+<img src="images/flm03_chart.png" width=500px>
 
 In the chart you may select by mouse details from a smaller time interval (does sadly not seem to work on a tablet computer); also you may switch on and off the different graphs in the chart using the checkboxes underneath the diagram panel.
 
-## Show Simple Consumption
-As a further visualization variant, following a [discussion in the FluksoForum](https://www.flukso.net/content/simple-graphically-styled-display-summarising-everything-including-net-consumption), I made a simple consumption view, showing what is produced (e.g. by a PV installation), what is totally consumed and what is as difference taken from respective supplied to the power grid. The specialty of this visualization is, that sensors can be labelled as *producing* or *consuming* input. The sensor configuration section can be toggled for convenience of the display.
+Please note: The FLM03 stores quite a lot of date; thus, the chart may be a bit crowded...
 
-<img src="FLMlocalConsumption.png" width=500px>
+## Show Simple Consumption
+As a further visualization variant, following a [discussion in the FluksoForum](https://www.flukso.net/content/simple-graphically-styled-display-summarising-everything-including-net-consumption), there is a simple consumption view, showing what is produced (e.g. by a PV installation), what is totally consumed and what is as difference taken from respective supplied to the power grid. The specialty of this visualization is, that sensors can be labelled as *producing* or *consuming* input. The display of the sensor configuration section can be toggled for convenience of the display.
+
+<img src="images/flm03_consumption.png" width=500px>
 
 ## Credits
 This code under [MIT license](LICENSE); all used libraries/includes with the respective license noted.
