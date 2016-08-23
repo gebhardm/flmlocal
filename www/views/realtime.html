@@ -9,24 +9,13 @@
 <div class="container-fluid">
     <div class="accordion-group">
         <div class="accordion-inner">
-            <div class="accordion-inner" id="chartpanel">
-                <div id="chart"></div>
-                <div id="info"></div>
-            </div>
-        </div>
-    </div>
-    <div class="accordion-group" collapse="msgCollapsed">
-        <div class="accordion-inner">
-            <small>
-                <b>Latest MQTT message: </b>{{message}}
-            </small>
+            <canvas id="chart"></canvas>
         </div>
     </div>
 </div>
 
 <div align="center">
     <small>
-        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Realtime Display</a> &copy; 2016 -
-        <a href ng-click="msgCollapsed = !msgCollapsed">Toggle Message View</a></p>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Realtime Display</a> &copy; 2016
     </small>
 </div>

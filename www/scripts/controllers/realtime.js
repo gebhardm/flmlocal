@@ -29,7 +29,6 @@ var RealtimeCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
-    $scope.selCollapsed = false;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -65,7 +64,7 @@ var RealtimeCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/+/current/+");
+        client.subscribe("/device/+/flx/current/+");
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {
@@ -99,6 +98,7 @@ var RealtimeCtrl = function($scope) {
         displayGraph(msg);
     }
     function displayGraph(msg) {
+        var data;
         if (myChart === undefined) {
             data = {
                 labels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ],
