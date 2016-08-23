@@ -30,8 +30,6 @@ var RealtimeCtrl = function($scope) {
         $scope.alerts.splice(index, 1);
     };
     $scope.selCollapsed = false;
-    // the FLM port configuration
-    var flx;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -134,7 +132,7 @@ var RealtimeCtrl = function($scope) {
     mqttConnect();
 };
 
-// the part of the AngularJS application that handles the graph
-GaugeCtrl.$inject = [ "$scope" ];
+// the part of the AngularJS application that handles the chart
+RealtimeCtrl.$inject = [ "$scope" ];
 
-angular.module("flmUiApp").controller("GraphCtrl", GraphCtrl);
+angular.module("flmUiApp").controller("RealtimeCtrl", RealtimeCtrl);
