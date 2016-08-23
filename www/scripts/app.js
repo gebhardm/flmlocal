@@ -87,6 +87,11 @@ angular.module('flmUiApp', [
         controller: 'PanelCtrl',
         tagName: 'panel'
       })
+      .when('/realtime', {
+        templateUrl: 'views/realtime.html',
+        controller: 'RealtimeCtrl',
+        tagName: 'realtime'
+      })
       .otherwise({
         redirectTo: '/'
       });
@@ -146,6 +151,10 @@ angular.module('flmUiApp', [
       {
         title: "panel",
         action: "#/panel"
+      },
+      {
+        title: "realtime",
+        action: "#/realtime"
       }
     ]
   }

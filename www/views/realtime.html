@@ -1,0 +1,32 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div class="page-header">
+    <h1>FluksoRealtime</h1>
+</div>
+
+<div class="container-fluid">
+    <div class="accordion-group">
+        <div class="accordion-inner">
+            <div class="accordion-inner" id="chartpanel">
+                <div id="chart"></div>
+                <div id="info"></div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-group" collapse="msgCollapsed">
+        <div class="accordion-inner">
+            <small>
+                <b>Latest MQTT message: </b>{{message}}
+            </small>
+        </div>
+    </div>
+</div>
+
+<div align="center">
+    <small>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Realtime Display</a> &copy; 2016 -
+        <a href ng-click="msgCollapsed = !msgCollapsed">Toggle Message View</a></p>
+    </small>
+</div>
