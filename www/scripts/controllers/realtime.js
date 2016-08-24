@@ -29,6 +29,9 @@ var RealtimeCtrl = function($scope) {
     $scope.closeAlert = function(index) {
         $scope.alerts.splice(index, 1);
     };
+    // the configuration section
+    $scope.cfgCollapsed = false;
+    var subscription = $('[name="subscription"]:checked').val();
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -64,7 +67,9 @@ var RealtimeCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/+/flx/current/+");
+        if (subscription !== undefined) {
+            client.subscribe(subscription);
+        }
     }
     // event handler on connection lost
     function onConnectionLost(responseObj) {
@@ -85,11 +90,6 @@ var RealtimeCtrl = function($scope) {
         } catch (error) {
             console.log("Error parsing JSON");
             return;
-        }
-        if (payload[2] === "mV") {
-            var series = payload[1];
-            for (var val in series) series[val] = series[val] / 1e3;
-            payload[2] = "V";
         }
         msg = {
             phase: phase,
@@ -129,6 +129,17 @@ var RealtimeCtrl = function($scope) {
             myChart.update();
         }
     }
+    $(document).on("click", '[name="subscription"]', function() {
+        var msg;
+        var sel = $(this).val();
+        if (subscription != sel && subscription !== undefined) {
+            if (client !== undefined) {
+                client.unsubscribe(subscription);
+                client.subscribe(sel);
+            }
+        }
+        subscription = sel;
+    });
     mqttConnect();
 };
 

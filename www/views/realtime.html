@@ -6,6 +6,19 @@
     <h1>FluksoRealtime</h1>
 </div>
 
+<div class="container-fluid"  collapse="cfgCollapsed">
+    <div class="accordion-group">
+        <div class="accordion-inner" id="cfg">
+            <div class="radio">
+                <label><input type="radio" name="subscription" value="/device/+/flx/current/+" checked>Current</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="subscription" value="/device/+/flx/voltage/+">Voltage</label>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="accordion-group">
         <div class="accordion-inner">
@@ -16,6 +29,7 @@
 
 <div align="center">
     <small>
-        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Realtime Display</a> &copy; 2016
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Realtime Display</a> &copy; 2016 -
+        <a href ng-click="cfgCollapsed = !cfgCollapsed">Toggle Configuration</a>
     </small>
 </div>
