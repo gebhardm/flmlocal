@@ -22,12 +22,12 @@
 
 ]]--
 
-local dbg = require "dbg"
+--local dbg = require "dbg"
 local nixio = require "nixio"
 nixio.fs = require "nixio.fs"
 local luci = require "luci"
 luci.json = require "luci.json"
-luci.util = require "luci.util"
+--luci.util = require "luci.util"
 local uci = require "luci.model.uci".cursor()
 local uloop = require "uloop"
 uloop.init()
