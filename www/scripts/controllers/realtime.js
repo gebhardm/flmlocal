@@ -82,10 +82,11 @@ var RealtimeCtrl = function($scope) {
     // handle the received message
     function onMessageArrived(mqttMsg) {
         var msg = {};
-        var phase = topic[topic.length - 1];
         var topic = mqttMsg.destinationName.split("/");
+        var type = topic[topic.length - 2];
+        var phase = topic[topic.length - 1];
         var payload = mqttMsg.payloadString;
-        var label = "L" + phase;
+        var label = type + "_L" + phase;
         var idx = 0;
         var index = -1;
         try {
@@ -98,9 +99,9 @@ var RealtimeCtrl = function($scope) {
             if (datasets[idx].label === label) index = idx;
         }
         if (index === -1) {
-            var red = Math.flor(Math.random() * 255);
-            var green = Math.flor(Math.random() * 255);
-            var blue = Math.flor(Math.random() * 255);
+            var red = Math.floor(Math.random() * 255);
+            var green = Math.floor(Math.random() * 255);
+            var blue = Math.floor(Math.random() * 255);
             var dataset = {
                 label: label,
                 fill: false,
@@ -132,15 +133,16 @@ var RealtimeCtrl = function($scope) {
         myChart.update();
     }
     $(document).on("click", '[name="subscription"]', function() {
-        var msg;
         var sel = $(this).val();
-        if (subscription != sel && subscription !== undefined) {
+        if (subscription !== sel && subscription !== undefined) {
             if (client !== undefined) {
                 client.unsubscribe(subscription);
                 client.subscribe(sel);
             }
+        }
+        if (myChart !== undefined) {
             datasets = [];
-            if (myChart !== undefined) myChart.destroy();
+            myChart.destroy();
         }
         subscription = sel;
     });
