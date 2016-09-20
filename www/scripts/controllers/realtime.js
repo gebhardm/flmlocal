@@ -49,6 +49,7 @@ var RealtimeCtrl = function($scope) {
             } ]
         }
     };
+	var datasets = [];
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -81,53 +82,54 @@ var RealtimeCtrl = function($scope) {
     // handle the received message
     function onMessageArrived(mqttMsg) {
         var msg = {};
-        var payload, phase, topic;
-        topic = mqttMsg.destinationName.split("/");
-        phase = topic[topic.length - 1];
-        payload = mqttMsg.payloadString;
+		var phase = topic[topic.length - 1];
+		var topic = mqttMsg.destinationName.split("/");
+        var payload = mqttMsg.payloadString;
+		var label = "L" + phase;
+		var idx = 0;
+		var index = -1;
         try {
             payload = JSON.parse(payload);
         } catch (error) {
             console.log("Error parsing JSON");
             return;
         }
-        msg = {
-            phase: phase,
-            data: payload[1]
-        };
-        displayGraph(msg);
+		for (idx = 0; idx < datasets.length; idx++) {
+			if (datasets[idx].label === label) index = idx;
+		}
+		if (index === -1) {
+			var red = Math.flor(Math.random() * 255);
+			var green = Math.flor(Math.random() * 255);
+			var blue = Math.flor(Math.random() * 255);
+            var dataset = {
+				label: label,
+				fill: false,
+				borderColor: "rgba(" + red + "," + green + "," + blue + ",1)",
+				data: payload[1]
+			};
+			datasets.push(dataset);
+		} else {
+			datasets[index].data = payload[1];
+		}
+        displayChart(datasets);
     }
-    function displayGraph(msg) {
+    function displayChart(datasets) {
         var data;
         if (myChart === undefined) {
-            data = {
-                labels: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ],
-                datasets: [ {
-                    label: "L1",
-                    fill: false,
-                    borderColor: "#f00",
-                    data: msg.data
-                }, {
-                    label: "L2",
-                    fill: false,
-                    borderColor: "#0f0",
-                    data: msg.data
-                }, {
-                    label: "L3",
-                    fill: false,
-                    borderColor: "#00f",
-                    data: msg.data
-                } ]
-            };
+			var labels = [];
+			for (var i=0; i<32; i++) labels.push(i);
+			var data = {
+				labels: labels,
+				datasets: datasets
+			}
             myChart = new Chart(ctx, {
                 type: "line",
                 data: data,
                 options: options
             });
-        } else {
-            myChart.data.datasets[msg.phase - 1].data = msg.data;
-            myChart.update();
         }
+        myChart.data.datasets = datasets;
+        myChart.update();
     }
     $(document).on("click", '[name="subscription"]', function() {
         var msg;
@@ -137,6 +139,8 @@ var RealtimeCtrl = function($scope) {
                 client.unsubscribe(subscription);
                 client.subscribe(sel);
             }
+			datasets = [];
+			if (myChart !== undefined) myChart.destroy();
         }
         subscription = sel;
     });
