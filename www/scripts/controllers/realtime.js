@@ -49,7 +49,7 @@ var RealtimeCtrl = function($scope) {
             } ]
         }
     };
-	var datasets = [];
+    var datasets = [];
     // the web socket connect function
     function mqttConnect() {
         var wsID = "FLM" + parseInt(Math.random() * 100, 10);
@@ -82,46 +82,46 @@ var RealtimeCtrl = function($scope) {
     // handle the received message
     function onMessageArrived(mqttMsg) {
         var msg = {};
-		var phase = topic[topic.length - 1];
-		var topic = mqttMsg.destinationName.split("/");
+        var phase = topic[topic.length - 1];
+        var topic = mqttMsg.destinationName.split("/");
         var payload = mqttMsg.payloadString;
-		var label = "L" + phase;
-		var idx = 0;
-		var index = -1;
+        var label = "L" + phase;
+        var idx = 0;
+        var index = -1;
         try {
             payload = JSON.parse(payload);
         } catch (error) {
             console.log("Error parsing JSON");
             return;
         }
-		for (idx = 0; idx < datasets.length; idx++) {
-			if (datasets[idx].label === label) index = idx;
-		}
-		if (index === -1) {
-			var red = Math.flor(Math.random() * 255);
-			var green = Math.flor(Math.random() * 255);
-			var blue = Math.flor(Math.random() * 255);
+        for (idx = 0; idx < datasets.length; idx++) {
+            if (datasets[idx].label === label) index = idx;
+        }
+        if (index === -1) {
+            var red = Math.flor(Math.random() * 255);
+            var green = Math.flor(Math.random() * 255);
+            var blue = Math.flor(Math.random() * 255);
             var dataset = {
-				label: label,
-				fill: false,
-				borderColor: "rgba(" + red + "," + green + "," + blue + ",1)",
-				data: payload[1]
-			};
-			datasets.push(dataset);
-		} else {
-			datasets[index].data = payload[1];
-		}
+                label: label,
+                fill: false,
+                borderColor: "rgba(" + red + "," + green + "," + blue + ",1)",
+                data: payload[1]
+            };
+            datasets.push(dataset);
+        } else {
+            datasets[index].data = payload[1];
+        }
         displayChart(datasets);
     }
     function displayChart(datasets) {
         var data;
         if (myChart === undefined) {
-			var labels = [];
-			for (var i=0; i<32; i++) labels.push(i);
-			var data = {
-				labels: labels,
-				datasets: datasets
-			}
+            var labels = [];
+            for (var i = 0; i < 32; i++) labels.push(i);
+            var data = {
+                labels: labels,
+                datasets: datasets
+            };
             myChart = new Chart(ctx, {
                 type: "line",
                 data: data,
@@ -139,8 +139,8 @@ var RealtimeCtrl = function($scope) {
                 client.unsubscribe(subscription);
                 client.subscribe(sel);
             }
-			datasets = [];
-			if (myChart !== undefined) myChart.destroy();
+            datasets = [];
+            if (myChart !== undefined) myChart.destroy();
         }
         subscription = sel;
     });
