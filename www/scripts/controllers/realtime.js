@@ -134,16 +134,11 @@ var RealtimeCtrl = function($scope) {
     }
     $(document).on("click", '[name="subscription"]', function() {
         var sel = $(this).val();
-        if (subscription !== sel && subscription !== undefined) {
-            if (client !== undefined) {
-                client.unsubscribe(subscription);
-                client.subscribe(sel);
-            }
-        }
-        if (myChart !== undefined) {
-            datasets = [];
-            myChart.destroy();
-        }
+        // reset subscription and chart display
+        if (subscription !== undefined && client !== undefined) client.unsubscribe(subscription);
+        datasets = [];
+        if (myChart !== undefined) myChart.destroy();
+        if (client !== undefined) client.subscribe(sel);
         subscription = sel;
     });
     mqttConnect();
