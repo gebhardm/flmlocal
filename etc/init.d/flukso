@@ -28,12 +28,14 @@ load_config3()
 	uci set system.@system[0].device=$DEVICE
 	uci set system.@system[0].hostname=$HOSTNAME
 
+	uci set flukso.main=settings
 	for i in `seq 128`;
 	do
 		ADDRESS=$((0x30 + i * 0x10))
 		ID=$(hexdump -v -e '1/1 "%.2x"' -s $ADDRESS -n 16 /dev/mtd4)
 		uci set flukso.$i=sensor
 		uci set flukso.$i.id=$ID
+		uci set flukso.main.max_provisioned_sensors=$i
 	done
 
 	if [ $(uci get kube.main.collect_group) == 0 ]
@@ -53,7 +55,7 @@ load_config3()
 program_sensor_board()
 {
 	DEV=/dev/ttyATH0
-	FIRMWARE=/usr/bin/flx/e/firmware.bin
+	FIRMWARE=/usr/bin/flx/e/firmware.bin 
 	OUT=/tmp/stm32flash.out
 	echo out > /sys/class/gpio/gpio20/direction
 	for i in `seq 10`;
@@ -90,8 +92,9 @@ start_fl()
 	service_start /usr/sbin/flxd
 	/usr/sbin/tmpod -u flukso
 	/usr/sbin/kubed -u flukso
-	/usr/sbin/queryd -u flukso
-
+        # start the tmpo query daemon
+        /usr/sbin/queryd -u flukso
+	
 	if [ $FIRSTBOOT -eq '1' ]
 	then
 		sleep 1
@@ -125,8 +128,9 @@ stop_fl()
 	service_stop /usr/sbin/flxd
 	/usr/sbin/supd -k
 	rm -rf /var/run/supd
-	/usr/sbin/queryd -k
-	rm -rf /var/run/queryd
+        # stop the tmpo query daemon
+        /usr/sbin/queryd -k
+        rm -rf /var/run/queryd
 }
 
 start()
@@ -146,3 +150,4 @@ stop()
 {
 	stop_fl
 }
+
