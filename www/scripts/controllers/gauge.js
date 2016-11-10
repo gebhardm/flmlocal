@@ -108,6 +108,7 @@ var GaugeCtrl = function($scope) {
                 if (cfg.enable == "1") {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
+                    sensors[cfg.id].enum = obj;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
@@ -134,6 +135,9 @@ var GaugeCtrl = function($scope) {
             sensor.id = sensorId;
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
+        // set name, if undefined
+        if (sensor.name === undefined) sensor.name = "S" + sensor.enum + "." + sensor.subtype;
+        // now store back
         sensors[sensorId] = sensor;
         // now compute the received mqttMessage
         switch (msgType) {
