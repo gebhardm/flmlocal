@@ -34,6 +34,8 @@ var GaugeCtrl = function($scope) {
     };
     // the FLM port configuration
     var flx;
+    // the FluksoKube configuration
+    var kube;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -61,6 +63,7 @@ var GaugeCtrl = function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/+/config/flx");
+        client.subscribe("/device/+/config/kube");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
@@ -102,6 +105,10 @@ var GaugeCtrl = function($scope) {
             flx = config;
             break;
 
+          case "kube":
+            kube = config;
+            break;
+
           case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
@@ -113,6 +120,13 @@ var GaugeCtrl = function($scope) {
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
                         if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                    }
+                    if (kube !== undefined) {
+                        for (var kid in kube) {
+                            if (parseInt[kid] && parseInt[obj] && cfg.kid === kid) {
+                                sensors[cfg.id].name = kube[kid].name;
+                            }
+                        }
                     }
                 }
             }
@@ -136,7 +150,7 @@ var GaugeCtrl = function($scope) {
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
         // set name, if undefined
-        if (sensor.name === undefined) sensor.name = "S" + sensor.enum + "." + sensor.subtype;
+        if (sensor.name === undefined) sensor.name = "S" + sensor.enum + "." + sensor.type;
         // now store back
         sensors[sensorId] = sensor;
         // now compute the received mqttMessage
