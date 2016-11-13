@@ -118,15 +118,12 @@ var GaugeCtrl = function($scope) {
                     sensors[cfg.id].enum = obj;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
-                    if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                    if (flx !== undefined && flx[cfg.port] !== undefined) {
+                        sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
                     }
-                    if (kube !== undefined) {
-                        for (var kid in kube) {
-                            if (parseInt[kid] && parseInt[obj] && cfg.kid === kid) {
-                                sensors[cfg.id].name = kube[kid].name;
-                            }
-                        }
+                    if (kube !== undefined && cfg.kid !== undefined) {
+                        sensors[cfg.id].name = kube[cfg.kid].name;
+                        sensors[cfg.id].kid = cfg.kid;
                     }
                 }
             }
@@ -150,7 +147,7 @@ var GaugeCtrl = function($scope) {
             sensor.name = sensorId;
         } else sensor = sensors[sensorId];
         // set name, if undefined
-        if (sensor.name === undefined) sensor.name = "S" + sensor.enum + "." + sensor.type;
+        if (sensor.name === undefined) sensor.name = "S" + sensor.enum + "_" + sensor.type;
         // now store back
         sensors[sensorId] = sensor;
         // now compute the received mqttMessage
