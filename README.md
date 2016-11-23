@@ -6,11 +6,11 @@ It contains a native implementation of [Justgage](http:/justgage.com) gauges, [F
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, clone or download the [repository](https://github.com/gebhardm/flmlocal/tree/flm03) (branch `flm03`) and copy the content of the [www/](www/) folder to your Fluksometer version 03E with firmware version 3.5.8-beta.<br><img src="images/clone_or_download.png"><br>
+To utilize this implementation, clone or download the [repository](https://github.com/gebhardm/flmlocal) (select fitting branch or release/tag) and copy the content of the [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.6.6.<br><img src="images/clone_or_download.png"><br>
 
-The current implementation reflects the state as of the FLM03E firmware version 3.5.8-beta (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
+The current implementation reflects the state as of the corresponding FLM firmware version (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
-Use the linux/OS X command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a 
+Use the linux/OS X command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a
 
     scp -r * root@<FLM ip address>:/www/
 
@@ -48,11 +48,11 @@ This query provider you may run with `lua /usr/sbin/queryd.lua &`.
 As an alternative you may install this also as a "real" daemon. For this you have to add a  symbolic link
 
     ln -s /usr/sbin/luad /usr/sbin/queryd
-    
+
 and start the query daemon by
 
     /usr/sbin/queryd -u flukso`
-    
+
 For automated start on reboot you have to change the `/etc/init.d/flukso` initialization file accordingly. Make a backup first! (`cp /etc/init.d/flukso /etc/init.d/flukso.bak`)
 Take a look at a reference [flukso.init](/etc/init.d/flukso) file for what to change (basically it is just the start and stop of the query daemon).
 
