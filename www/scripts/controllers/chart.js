@@ -35,6 +35,8 @@ var ChartCtrl = function($scope) {
     var reconnectTimeout = 2e3;
     // the FLM03 port configuration
     var flx;
+    // the Kube configuration
+    var kube;
     // the FLM's web socket port from mosquitto
     var broker = location.hostname;
     var port = 8083;
@@ -88,6 +90,7 @@ var ChartCtrl = function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/+/config/flx");
+        client.subscribe("/device/+/config/kube");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/query/+/+");
     }
@@ -123,11 +126,10 @@ var ChartCtrl = function($scope) {
         switch (topic[4]) {
           case "flx":
             flx = config;
-            for (var id in sensors) {
-                if (sensors[id].port !== undefined) {
-                    sensors[id].name = flx[sensors[id].port].name + " " + sensors[id].subtype;
-                }
-            }
+            break;
+
+          case "kube":
+            kube = config;
             break;
 
           case "sensor":
@@ -136,10 +138,15 @@ var ChartCtrl = function($scope) {
                 if (cfg.enable == "1") {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
+                    if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
                     if (cfg.type !== undefined) sensors[cfg.id].type = cfg.type;
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined && flx[cfg.port] !== undefined) {
                         sensors[cfg.id].name = flx[cfg.port[0]].name + " " + cfg.subtype;
+                    }
+                    if (kube !== undefined && cfg.kid !== undefined) {
+                        sensors[cfg.id].name = kube[cfg.kid].name + " " + cfg.type;
+                        sensors[cfg.id].kid = cfg.kid;
                     }
                     sensors[cfg.id].data = new Array();
                 }

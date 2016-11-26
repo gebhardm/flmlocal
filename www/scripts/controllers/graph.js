@@ -32,6 +32,8 @@ var GraphCtrl = function($scope) {
     $scope.selCollapsed = false;
     // the FLM port configuration
     var flx;
+    // the Kube configuration
+    var kube;
     // link to the web server's IP address for MQTT socket connection
     var client;
     var reconnectTimeout = 2e3;
@@ -84,6 +86,7 @@ var GraphCtrl = function($scope) {
     // event handler on connection established
     function onConnect() {
         client.subscribe("/device/+/config/flx");
+        client.subscribe("/device/+/config/kube");
         client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
@@ -119,6 +122,10 @@ var GraphCtrl = function($scope) {
             flx = config;
             break;
 
+          case "kube":
+            kube = config;
+            break;
+
           case "sensor":
             for (var obj in config) {
                 var cfg = config[obj];
@@ -126,9 +133,14 @@ var GraphCtrl = function($scope) {
                     if (sensors[cfg.id] === undefined) sensors[cfg.id] = new Object();
                     sensors[cfg.id].id = cfg.id;
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
+                    if (cfg.type !== undefined) sensors[cfg.id].type = cfg.type;
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
                         if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                    }
+                    if (kube !== undefined && cfg.kid !== undefined) {
+                        sensors[cfg.id].name = kube[cfg.kid].name + " " + cfg.type;
+                        sensors[cfg.id].kid = cfg.kid;
                     }
                 }
             }
