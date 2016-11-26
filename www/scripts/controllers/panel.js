@@ -113,21 +113,19 @@ var PanelCtrl = function($scope) {
                         sensor = {};
                         sensor.id = cfg.id;
                         if (cfg.port !== undefined) sensor.port = cfg.port[0];
+                        if (cfg.type !== undefined) sensor.type = cfg.type;
                         if (cfg.subtype !== undefined) sensor.subtype = cfg.subtype;
-                        if (flx !== undefined) {
-                            if (flx[cfg.port] !== undefined) sensor.name = flx[cfg.port].name + " " + cfg.subtype;
-                        }
                         sensors.push(sensor);
-                    } else {
-                        if (flx !== undefined) {
-                            if (flx[cfg.port] !== undefined) {
-                                sensor.name = flx[cfg.port].name + " " + cfg.subtype;
-                            }
+                        sensor = sensors[sensors.length - 1];
+                    }
+                    if (flx !== undefined) {
+                        if (flx[cfg.port] !== undefined) {
+                            sensor.name = flx[cfg.port].name + " " + cfg.subtype;
                         }
-                        if (kube !== undefined && cfg.kid !== undefined) {
-                            sensor.name = kube[cfg.kid].name;
-                            sensor.kid = cfg.kid;
-                        }
+                    }
+                    if (kube !== undefined && cfg.kid !== undefined) {
+                        sensor.name = kube[cfg.kid].name + " " + cfg.type;
+                        sensor.kid = cfg.kid;
                     }
                 }
             }
