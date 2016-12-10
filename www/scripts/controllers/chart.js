@@ -149,6 +149,8 @@ var ChartCtrl = function($scope) {
                         sensors[cfg.id].kid = cfg.kid;
                     }
                     sensors[cfg.id].data = new Array();
+                    // add graph selection option
+                    if (!$("#" + cfg.id).length) $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + sensors[cfg.id].id + "'></input>" + sensors[cfg.id].name + "</label></small>" + "</div>");
                 }
             }
             break;
@@ -253,8 +255,6 @@ var ChartCtrl = function($scope) {
             obj.color = color;
             color++;
             chart.push(obj);
-            // add graph selection option
-            $("#choices").append("<div class='checkbox'>" + "<small><label>" + "<input type='checkbox' id='" + obj.label + "' checked='checked'></input>" + obj.label + "</label></small>" + "</div>");
         } else {
             obj[0].data = data;
         }
@@ -263,11 +263,11 @@ var ChartCtrl = function($scope) {
         function plotSelChart() {
             selChart = [];
             $("#choices").find("input:checked").each(function() {
-                var key = $(this).attr("id");
+                var key = sensors[$(this).attr("id")].name;
                 var s = chart.filter(function(o) {
                     return o.label == key;
                 });
-                selChart.push(s[0]);
+                if (s[0] !== undefined) selChart.push(s[0]);
             });
             $("#info").html("");
             // size the output area
@@ -343,10 +343,14 @@ var ChartCtrl = function($scope) {
         $("#fromTime").val(localTime);
         $("#toDate").val(localDate);
         $("#toTime").val(localTime);
+        // enable all sensor selections
+        for (var s in sensors) {
+            sensors[s].data = [];
+            $("#" + sensors[s].id).prop("disabled", false);
+        }
         // clear the chart area
         $("#chart").html("");
         $("#info").html("");
-        $("#choices").html("");
     });
     // prepare and emit the query request
     $("#submit").on("click", function() {
@@ -363,16 +367,22 @@ var ChartCtrl = function($scope) {
         }
         var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
         for (var s in sensors) {
-            msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
-            client.send(msg);
+            // msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
+            // client.send(msg);
             // clear potentially existing chart data
             sensors[s].data = [];
+            $("#" + sensors[s].id).prop("disabled", true);
         }
+        $("#choices").find("input:checked").each(function() {
+            msg.destinationName = "/query/" + $(this).attr("id") + "/tmpo";
+            client.send(msg);
+            $("#" + $(this).attr("id")).prop("disabled", false);
+        });
         // clear the chart section and show notification
         chart = [];
         color = 0;
         $("#chart").html("");
-        $("#choices").html("");
+        //$("#choices").html("");
         $("#info").html("<div align='center'>Query request sent...</div>");
     });
     // allow tooltip on datapoints
