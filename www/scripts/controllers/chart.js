@@ -270,12 +270,16 @@ var ChartCtrl = function($scope) {
                 if (s[0] !== undefined) selChart.push(s[0]);
             });
             $("#info").html("");
-            // size the output area
-            var width = $("#chartpanel").width();
-            var height = width * 3 / 4;
-            height = height > 600 ? 600 : height;
-            $("#chart").width(width).height(height);
-            $("#chart").plot(selChart, chartOptions);
+            // size the output area and plot the chart
+            if (selChart.length > 0) {
+                var width = $("#chartpanel").width();
+                var height = width * 3 / 4;
+                height = height > 600 ? 600 : height;
+                $("#chart").width(width).height(height);
+                $("#chart").plot(selChart, chartOptions);
+            } else {
+                $("#chart").html("").height(0);
+            }
         }
         // and finally plot the graph
         $("#info").html("");
@@ -347,9 +351,11 @@ var ChartCtrl = function($scope) {
         for (var s in sensors) {
             sensors[s].data = [];
             $("#" + sensors[s].id).prop("disabled", false);
+            $("#" + sensors[s].id).prop("checked", false);
         }
-        // clear the chart area
-        $("#chart").html("");
+        // clear the chart and chart area
+        $("#chart").html("").height(0);
+        chart = [];
         $("#info").html("");
     });
     // prepare and emit the query request
@@ -367,23 +373,30 @@ var ChartCtrl = function($scope) {
         }
         var msg = new Paho.MQTT.Message("[" + from + "," + to + "]");
         for (var s in sensors) {
-            // msg.destinationName = "/query/" + sensors[s].id + "/tmpo";
-            // client.send(msg);
             // clear potentially existing chart data
             sensors[s].data = [];
             $("#" + sensors[s].id).prop("disabled", true);
         }
+        // now send the query request by mqtt
+        var queried = 0;
         $("#choices").find("input:checked").each(function() {
             msg.destinationName = "/query/" + $(this).attr("id") + "/tmpo";
             client.send(msg);
             $("#" + $(this).attr("id")).prop("disabled", false);
+            queried++;
         });
         // clear the chart section and show notification
         chart = [];
         color = 0;
         $("#chart").html("");
-        //$("#choices").html("");
-        $("#info").html("<div align='center'>Query request sent...</div>");
+        if (queried > 0) {
+            $("#info").html("<div align='center'>Query request sent...</div>");
+        } else {
+            $("#info").html("<div align='center'>Nothing selected...</div>");
+            setTimeout(function() {
+                $("#refresh").click();
+            }, 2e3);
+        }
     });
     // allow tooltip on datapoints
     $("<div id='tooltip'></div>").css({
