@@ -205,25 +205,58 @@ var ChartCtrl = function($scope) {
         var qtime, qval, deltax, deltat;
         var sumt, sumx;
         var lastt;
-        var i, n = 30;
+        var i, sec;
         data = [];
         deltax = 0;
         deltat = 0;
         sumx = 0;
         sumt = 0;
+        // set length of "rolling average"
+        switch (sensors[sensor].subtype) {
+          case "pplus":
+          case "pminus":
+          case "q1":
+          case "q2":
+          case "q3":
+          case "q4":
+          case "vrms":
+          case "irms":
+            sec = 30;
+            break;
+
+          default:
+            sec = 1;
+            break;
+        }
+        // set timestamp on ms
         if (sensors[sensor].data.length > 0) lastt = sensors[sensor].data[0][0] * 1e3;
+        // now compute the "rolling average"
         for (i = 1; i < sensors[sensor].data.length; i++) {
             qtime = sensors[sensor].data[i][0] * 1e3;
+            qval = sensors[sensor].data[i][1];
             deltax = sensors[sensor].data[i][1] - sensors[sensor].data[i - 1][1];
             deltat = sensors[sensor].data[i][0] - sensors[sensor].data[i - 1][0];
             sumx += deltax;
             sumt += deltat;
-            if (sumt >= n || i == sensors[sensor].data.length - 1) {
+            if (sumt >= sec || i == sensors[sensor].data.length - 1) {
                 // compute the different sensor types
                 switch (sensors[sensor].type) {
                   case "electricity":
                     // calculate the wattage from the given Wh values in time interval
-                    qval = 3600 * sumx / sumt;
+                    switch (sensors[sensor].subtype) {
+                      case "pplus":
+                      case "pminus":
+                      case "q1":
+                      case "q2":
+                      case "q3":
+                      case "q4":
+                        qval = 3600 * sumx / sumt;
+                        break;
+
+                      default:
+                        // just take qval as it is
+                        break;
+                    }
                     break;
 
                   case "water":
@@ -236,10 +269,11 @@ var ChartCtrl = function($scope) {
                     qval = sumx;
                     break;
                 }
-                qval = Math.round(qval * 10) / 10;
+                // round on two digits
+                qval = Math.round(qval * 100) / 100;
                 sumx = 0;
                 sumt = 0;
-                if (deltat >= n) data.push([ lastt, qval ]);
+                if (deltat >= sec) data.push([ lastt, qval ]);
                 data.push([ qtime, qval ]);
             }
             lastt = qtime;
