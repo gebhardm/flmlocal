@@ -6,11 +6,14 @@ It contains a native implementation of [Justgage](http:/justgage.com) gauges, [F
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, clone or download the [repository](https://github.com/gebhardm/flmlocal) (select fitting branch or release/tag) and copy the content of the [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.6.6.<br><img src="images/clone_or_download.png"><br>
+To utilize this implementation, **clone or download** this [repository](https://github.com/gebhardm/flmlocal). Checkout the fitting branch of your Fluksometer, so either [flm02](https://github.com/gebhardm/flmlocal/tree/flm02) or [flm03](https://github.com/gebhardm/flmlocal/tree/flm03) or choose a "packed" variant per [release/tag](https://github.com/gebhardm/flmlocal/releases).
+I will keep the [master branch](https://github.com/gebhardm/flmlocal/tree/master) on the stable version for the newest Fluksometer. In case of uncertainty refer to the [commit history](https://github.com/gebhardm/flmlocal/network)).
+
+Then copy the content of the respective [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.6.6 respectively.
 
 The current implementation reflects the state as of the corresponding FLM firmware version (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
-Use the linux/OS X command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a
+Use the Linux/MacOS command **scp** for this purpose; for windows use [WinSCP](http://winscp.net). When changed to the [www/](www/) directory, perform a
 
     scp -r * root@<FLM ip address>:/www/
 
@@ -24,7 +27,7 @@ in your browser (you may find the FLM also through Bonjour/service discovery). B
 
 <img src="images/flm03_menu.png">
 
-For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file (this is equivalent for FLM02 and FLM03, respectively).
+For a **step-by-step description**, please refer to the [howto/](howto/) folder and its [ReadMe](https://github.com/gebhardm/flmlocal/blob/master/howto/ReadMe.md) file (the process as such is equivalent for FLM02 and FLM03, respectively, but be aware of the different implementations for FLM02 and FLM03; they are **not** equal and **not** compatible).
 
 All code is JavaScript with corresponding HTML utilizing the FLM's AngularJS user interface. With this implementation also all necessary libraries are copied; so there is no need to install anything else.
 
