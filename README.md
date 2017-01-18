@@ -54,7 +54,7 @@ As an alternative you may install this also as a "real" daemon. For this you hav
 
 and start the query daemon by
 
-    /usr/sbin/queryd -u flukso`
+    /usr/sbin/queryd -u flukso
 
 For automated start on reboot you have to change the `/etc/init.d/flukso` initialization file accordingly. Make a backup first! (`cp /etc/init.d/flukso /etc/init.d/flukso.bak`)
 Take a look at a reference [flukso.init](/etc/init.d/flukso) file for what to change (basically it is just the start and stop of the query daemon).
