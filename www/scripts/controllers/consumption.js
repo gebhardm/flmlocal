@@ -117,7 +117,8 @@ var ConsumptionCtrl = function($scope) {
                     if (cfg.port !== undefined) sensors[cfg.id].port = cfg.port[0];
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name;
+                        if (cfg.subtype !== undefined) sensors[cfg.id].name = sensors[cfg.id].name + " " + cfg.subtype;
                     }
                 }
             }
