@@ -120,7 +120,11 @@ var PanelCtrl = function($scope) {
                     }
                     if (flx !== undefined) {
                         if (flx[cfg.port] !== undefined) {
-                            sensor.name = flx[cfg.port].name + " " + cfg.subtype;
+                            if (cfg.subtype !== undefined) {
+                                sensor.name = flx[cfg.port].name + " " + cfg.subtype;
+                            } else {
+                                sensor.name = flx[cfg.port].name;
+                            }
                         }
                     }
                     if (kube !== undefined && cfg.kid !== undefined) {

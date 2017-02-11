@@ -136,7 +136,10 @@ var GraphCtrl = function($scope) {
                     if (cfg.type !== undefined) sensors[cfg.id].type = cfg.type;
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined) {
-                        if (flx[cfg.port] !== undefined) sensors[cfg.id].name = flx[cfg.port].name + " " + cfg.subtype;
+                        if (flx[cfg.port] !== undefined) {
+                            sensors[cfg.id].name = flx[cfg.port].name;
+                            if (cfg.subtype !== undefined) sensors[cfg.id].name = sensors[cfg.id].name + " " + cfg.subtype;
+                        }
                     }
                     if (kube !== undefined && cfg.kid !== undefined) {
                         sensors[cfg.id].name = kube[cfg.kid].name + " " + cfg.type;

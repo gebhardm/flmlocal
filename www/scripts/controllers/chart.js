@@ -142,7 +142,11 @@ var ChartCtrl = function($scope) {
                     if (cfg.type !== undefined) sensors[cfg.id].type = cfg.type;
                     if (cfg.subtype !== undefined) sensors[cfg.id].subtype = cfg.subtype;
                     if (flx !== undefined && flx[cfg.port] !== undefined) {
-                        sensors[cfg.id].name = flx[cfg.port[0]].name + " " + cfg.subtype;
+                        if (cfg.subtype !== undefined) {
+                            sensors[cfg.id].name = flx[cfg.port[0]].name + " " + cfg.subtype;
+                        } else {
+                            sensors[cfg.id].name = flx[cfg.port[0]].name;
+                        }
                     }
                     if (kube !== undefined && cfg.kid !== undefined) {
                         sensors[cfg.id].name = kube[cfg.kid].name + " " + cfg.type;
