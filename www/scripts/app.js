@@ -77,6 +77,11 @@ angular.module('flmUiApp', [
         controller: 'GaugeCtrl',
         tagName: 'gauge'
       })
+      .when('/gauge_gen', {
+        templateUrl: 'views/gauge_generic.html',
+        controller: 'GaugeGenCtrl',
+        tagName: 'gauge_gen'
+      })
       .when('/graph', {
         templateUrl: 'views/graph.html',
         controller: 'GraphCtrl',
@@ -143,6 +148,10 @@ angular.module('flmUiApp', [
       {
         title: "gauge",
         action: "#/gauge"
+      },
+      {
+        title: "generic gauge",
+        action: "#/gauge_gen"
       },
       {
         title: "graph",

@@ -23,7 +23,7 @@ THE SOFTWARE.
 */
 "use strict";
 
-var GaugeCtrl = function($scope) {
+var GaugeGenCtrl = function($scope) {
     $scope.debug = false;
     $scope.alerts = [];
     $scope.gauges = [];
@@ -234,6 +234,6 @@ var GaugeCtrl = function($scope) {
 };
 
 // the part of the AngularJS application that handles the gauges
-GaugeCtrl.$inject = [ "$scope" ];
+GaugeGenCtrl.$inject = [ "$scope" ];
 
-angular.module("flmUiApp").controller("GaugeCtrl", GaugeCtrl);
+angular.module("flmUiApp").controller("GaugeGenCtrl", GaugeGenCtrl);
