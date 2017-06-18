@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Bart Van Der Meerssche <bart@flukso.net>
+ * Copyright (c) 2017 Bart Van Der Meerssche <bart@flukso.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,11 @@ angular.module('flmUiApp', [
         controller: 'StatusCtrl',
         tagName: 'status'
       })
+      .when('/gauge', {
+        templateUrl: 'views/gauge.html',
+        controller: 'GaugeCtrl',
+        tagName: 'gauge'
+      })
       .when('/syslog', {
         templateUrl: 'views/syslog.html',
         controller: 'SyslogCtrl',
@@ -62,6 +67,11 @@ angular.module('flmUiApp', [
         controller: 'MqttCtrl',
         tagName: 'mqtt'
       })
+      .when('/test', {
+        templateUrl: 'views/test.html',
+        controller: 'TestCtrl',
+        tagName: 'test'
+      })
       .when('/chart', {
         templateUrl: 'views/chart.html',
         controller: 'ChartCtrl',
@@ -71,11 +81,6 @@ angular.module('flmUiApp', [
         templateUrl: 'views/consumption.html',
         controller: 'ConsumptionCtrl',
         tagName: 'consumption'
-      })
-      .when('/gauge', {
-        templateUrl: 'views/gauge.html',
-        controller: 'GaugeCtrl',
-        tagName: 'gauge'
       })
       .when('/gauge_gen', {
         templateUrl: 'views/gauge_generic.html',
@@ -130,6 +135,10 @@ angular.module('flmUiApp', [
       {
         title: "mqtt",
         action: "#/mqtt"
+      },
+      {
+        title: "test",
+        action: "#/test"
       }
     ]
   },
