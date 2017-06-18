@@ -1,15 +1,15 @@
 # FLM local visualizations
 This repository contains a selection of visualizations that run directly on the [Fluksometer](http://www.flukso.net/about) as an addendum to its inherent firmware.
 
-It contains a native implementation of [Justgage](http:/justgage.com) gauges, [Flot](http://www.flotcharts.org/) charts and graph, a plain panel and a "simple consumption view" to be used with the [Fluksometer's](http://flukso.net) AngularJS based user interface.
+It contains a native implementation of [Justgage](http:/justgage.com) generic gauges (despite the FLM03 onboard variant), [Flot](http://www.flotcharts.org/) charts and graph, a plain panel and a "simple consumption view" to be used with the [Fluksometer's](http://flukso.net) AngularJS based user interface.
 
 The implementation sits on top of the [Paho JavaScript client](https://eclipse.org/paho/clients/js/) to receive and compute MQTT (sensor) messages.
 
 ## How to use
-To utilize this implementation, **clone or download** this [repository](https://github.com/gebhardm/flmlocal). Checkout the fitting branch of your Fluksometer, so either [flm02](https://github.com/gebhardm/flmlocal/tree/flm02) or [flm03](https://github.com/gebhardm/flmlocal/tree/flm03) or choose a "packed" variant per [release/tag](https://github.com/gebhardm/flmlocal/releases).
+To utilize this implementation, **clone or download** this [repository](https://github.com/gebhardm/flmlocal). Check out the fitting branch of your Fluksometer, so either [flm02](https://github.com/gebhardm/flmlocal/tree/flm02) or [flm03](https://github.com/gebhardm/flmlocal/tree/flm03) or choose a "packed" variant per [release/tag](https://github.com/gebhardm/flmlocal/releases).
 I will keep the [master branch](https://github.com/gebhardm/flmlocal/tree/master) on the stable version for the newest Fluksometer. In case of uncertainty refer to the [commit history](https://github.com/gebhardm/flmlocal/network)).
 
-Then copy the content of the respective [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.6.6 respectively.
+Then copy the content of the respective [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.7.8 respectively.
 
 The current implementation reflects the state as of the corresponding FLM firmware version (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
