@@ -1,5 +1,5 @@
 #!/bin/sh /etc/rc.common
-# Copyright (c) 2011 Bart Van Der Meerssche
+# Copyright (c) 2017 Bart Van Der Meerssche <bart@flukso.net>
 
 START=99
 
@@ -27,6 +27,7 @@ load_config3()
 	uci set system.@system[0].key=$KEY
 	uci set system.@system[0].device=$DEVICE
 	uci set system.@system[0].hostname=$HOSTNAME
+	uci set network.wan.hostname=$HOSTNAME
 
 	uci set flukso.main=settings
 	for i in `seq 128`;
@@ -55,7 +56,7 @@ load_config3()
 program_sensor_board()
 {
 	DEV=/dev/ttyATH0
-	FIRMWARE=/usr/bin/flx/e/firmware.bin 
+	FIRMWARE=/usr/bin/flx/e/firmware.bin
 	OUT=/tmp/stm32flash.out
 	echo out > /sys/class/gpio/gpio20/direction
 	for i in `seq 10`;
@@ -65,16 +66,6 @@ program_sensor_board()
 	done
 	echo in > /sys/class/gpio/gpio20/direction
 	logger 'flashing the flx at firstboot'
-}
-
-test_sensor_board()
-{
-	TEST=/usr/bin/ftest
-	IP=192.168.255.2
-	PORT=8080
-#	RESULT=$($TEST; echo $?)
-
-	wget -s -q "http://$IP:$PORT/cgi-bin/test?result=$RESULT"
 }
 
 start_fl()
@@ -87,33 +78,36 @@ start_fl()
 
 	MODEL=$(uci get system.@system[0].model)
 
+	chown -R flukso:flukso /flukso
 	chmod 666 /sys/class/leds/globe/trigger
 	/usr/sbin/supd
 	service_start /usr/sbin/flxd
 	/usr/sbin/tmpod -u flukso
 	/usr/sbin/kubed -u flukso
-        # start the tmpo query daemon
-        /usr/sbin/queryd -u flukso
-	
+	# start the tmpo query daemon
+	/usr/sbin/queryd -u flukso
+	sleep 2
+
 	if [ $FIRSTBOOT -eq '1' ]
 	then
-		sleep 1
-		test_sensor_board
-
 		uci set system.@system[0].firstboot='0'
 		uci commit
 	fi
 
 	HEARTBEAT=/usr/bin/heartbeat
 	FCHECK=/usr/bin/fcheck
+	FTEST=/usr/bin/ftest
+	HOUR=$(date '+%H')
 	MINUTE=$(date '+%M')
+	CRON=/tmp/cron
 
 	# Tell the server we've had a reset
 	$HEARTBEAT 1 >&- 2>&- <&-
-
 	# Configure cron
-	echo -e "$MINUTE * * * * $HEARTBEAT 0\n*/15 * * * * $FCHECK" | crontab -
-
+	echo "$MINUTE * * * * $HEARTBEAT 0" > $CRON
+	echo "*/15 * * * * $FCHECK" >> $CRON
+	echo "$((++MINUTE%60)) $HOUR * * * $FTEST" >> $CRON
+	crontab $CRON
 	# Making sure all committed uci changes are written to flash
 	sync
 }
@@ -128,9 +122,9 @@ stop_fl()
 	service_stop /usr/sbin/flxd
 	/usr/sbin/supd -k
 	rm -rf /var/run/supd
-        # stop the tmpo query daemon
-        /usr/sbin/queryd -k
-        rm -rf /var/run/queryd
+	#stop the query daemon
+	/usr/sbin/queryd -k
+	rm -rf /var/run/queryd
 }
 
 start()
@@ -140,7 +134,7 @@ start()
 	then
 		set_version
 		load_config3
-		chown flukso:flukso /flukso
+		chown -R flukso:flukso /flukso
 	fi
 	echo "flm03" > /tmp/sysinfo/board_name
 	start_fl
@@ -150,4 +144,3 @@ stop()
 {
 	stop_fl
 }
-
