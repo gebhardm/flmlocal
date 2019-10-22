@@ -9,7 +9,7 @@ The implementation sits on top of the [Paho JavaScript client](https://eclipse.o
 To utilize this implementation, **clone or download** this [repository](https://github.com/gebhardm/flmlocal). Check out the fitting branch of your Fluksometer, so either [flm02](https://github.com/gebhardm/flmlocal/tree/flm02) or [flm03](https://github.com/gebhardm/flmlocal/tree/flm03) or choose a "packed" variant per [release/tag](https://github.com/gebhardm/flmlocal/releases).
 I will keep the [master branch](https://github.com/gebhardm/flmlocal/tree/master) on the stable version for the newest Fluksometer. In case of uncertainty refer to the [commit history](https://github.com/gebhardm/flmlocal/network)).
 
-Then copy the content of the respective [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version 2.50 or  3.7.8 respectively.
+Then copy the content of the respective [www/](www/) folder to your Fluksometer version 02 or 03E with firmware version v250 or  v380 respectively (for the FLM03E versions 378 and 380 there is no difference in the UI).
 
 The current implementation reflects the state as of the corresponding FLM firmware version (please note that the original files `www/index.html` and `www/scripts/app.js` are overwritten; a factory reset should recover these).<br>
 
@@ -17,7 +17,7 @@ Use the Linux/MacOS command **scp** for this purpose; for windows use [WinSCP](h
 
     scp -r * root@<FLM ip address>:/www/
 
-You are prompted for the root's password (default is `root`), then all necessary files are transferred (recursively through option -r) to your Fluksometer.
+You are prompted for the root's password (default is `root`, better change it), then all necessary files are transferred (recursively through option -r) to your Fluksometer.
 
 By that you gain direct access to the different visualization alternatives directly from the Fluksometer's landing page navigation when calling
 
