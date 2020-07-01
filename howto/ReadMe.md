@@ -24,7 +24,7 @@ By default the master branch contains the last stable version of the newest Fluk
 
     git checkout flm02
 
-There is also a branch for the FLM03; this you may use as alternative to the master branch for the FLM03; most likely they are identical. They may differ if I choose to test some new features.
+There is also a branch for the FLM03; this you may use as alternative to the master branch for the FLM03; most likely they are identical. They may differ if I choose to test some new features. Note that a checkout works only, when you entered the repository's directory, you just cloned; so perform "at least" a `cd flmlocal`.
 
 ## Changing directory to the files to copy
 As the repository contains also a ReadMe file and this installation description, you have to switch directories and enter the one from where to copy the "correct" files onto your fluksometer. This is done, as depicted above, by a `cd flmlocal/www`. The `www/` directory corresponds to the webserver directory already existing on the fluksometer. Into this we will copy some more content and overwrite two existing files (`index.html` and `www/scripts/app.js`) to add the visualization functionality.
