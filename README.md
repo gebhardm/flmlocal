@@ -17,6 +17,8 @@ Use the Linux/MacOS command **scp** for this purpose; for windows use [WinSCP](h
 
     scp -r * root@<FLM ip address>:/www/
 
+Note: With legacy encryption installed, it may be necessary to explicitly allow the used encryption mode for file transfer:<br> `scp -oKexAlgorithms=+diffie-hellman-group1-sha1 -r * root@<FLM ip address>:/www/`
+
 You are prompted for the root's password (default is `root`, better change it), then all necessary files are transferred (recursively through option -r) to your Fluksometer.
 
 By that you gain direct access to the different visualization alternatives directly from the Fluksometer's landing page navigation when calling
